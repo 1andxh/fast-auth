@@ -20,6 +20,12 @@ services:
     volumes:
       - .:/app
       - /app/.venv
+    # local dev only
+    command: >
+      uv run uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
 
   postgres:
     image: postgres:16-alpine
@@ -28,7 +34,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: fauth_db
+      POSTGRES_DB: auth-postgres
     ports:
       - "5433:5432"
     networks:
@@ -43,7 +49,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: fauth-redis
+    container_name: auth-redis
     restart: always
     ports:
       - "6380:6379"

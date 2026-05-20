@@ -11,6 +11,7 @@ _$py.class
 .pytest_cache/
 .mypy_cache/
 *.pyv
+ruff_cache
 
 
 # UV and Virtual Environments
@@ -22,3 +23,5 @@ _$py.class
 
 .env
 .venv
+
+alembic/versions

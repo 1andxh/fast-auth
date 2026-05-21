@@ -12,6 +12,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migration:
+        condition: service_completed_successfully
     environment:
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
@@ -26,6 +28,18 @@ services:
       --host 0.0.0.0
       --port 8000
       --reload
+  
+  migration:
+    build: .
+    container_name: fauth-migrate
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: uv run alembic upgrade head
 
   postgres:
     image: postgres:16-alpine
@@ -34,7 +48,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: auth-postgres
+      POSTGRES_DB: fauth_db
     ports:
       - "5433:5432"
     networks:
@@ -67,5 +81,3 @@ volumes:
   postgres_data:
   redis_data:
 
-networks:
-  driver: bridge

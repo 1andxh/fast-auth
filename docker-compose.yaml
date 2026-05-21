@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8000:8000"
+      - "8080:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -24,7 +24,7 @@ services:
       - /app/.venv
     # local dev only
     command: >
-      uv run uvicorn app.main:app
+      uv run uvicorn src:app
       --host 0.0.0.0
       --port 8000
       --reload
@@ -39,6 +39,7 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
+      - /app/.venv
     command: uv run alembic upgrade head
 
   postgres:

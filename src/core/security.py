@@ -1,6 +1,7 @@
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
 import secrets
+import hashlib
 
 pasword_hasher = PasswordHasher(
     time_cost=3,
@@ -24,3 +25,7 @@ class Security:
     @staticmethod
     def generate_refresh_token() -> str:
         return secrets.token_urlsafe(32)
+
+    @staticmethod
+    def hash_refresh_token(token: str) -> str:
+        return hashlib.sha256(token.encode("utf-8")).hexdigest()

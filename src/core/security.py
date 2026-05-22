@@ -23,8 +23,12 @@ class Security:
             return False
 
     @staticmethod
-    def generate_refresh_token() -> str:
-        return secrets.token_urlsafe(32)
+    def check_need_rehash(hashed: str) -> bool:
+        return pasword_hasher.check_needs_rehash(hashed)
+
+    @staticmethod
+    def generate_refresh_token(length: int = 32) -> str:
+        return secrets.token_urlsafe(length)
 
     @staticmethod
     def hash_refresh_token(token: str) -> str:

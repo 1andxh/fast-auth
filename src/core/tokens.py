@@ -35,3 +35,10 @@ def decode_token(token: str) -> TokenPayload:
         return TokenPayload(**payload)
     except jwt.InvalidTokenError as exc:
         raise ValueError("Invalid Token") from exc
+
+
+def validate_access_token(token: str) -> TokenPayload:
+    payload = decode_token(token)
+    if payload.type != "access":
+        raise ValueError("Invalid token type")
+    return payload

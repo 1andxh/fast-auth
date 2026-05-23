@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     APP_NAME: str = "fast-auth"
+    VERSION: str = "0.1.0"
 
     DATABASE_URL: str
     REDIS_URL: str

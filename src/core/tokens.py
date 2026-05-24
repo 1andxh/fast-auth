@@ -2,9 +2,9 @@ from datetime import datetime, timedelta, timezone
 import uuid
 import jwt
 
-
 from src.core.config import settings
 from src.schemas import TokenPayload
+from src.core.exceptions import ExpiredTokenError, InvalidTokenError
 
 JWT_SECRET = settings.JWT_SECRET_KEY
 JWT_ALGORITHM = settings.JWT_ALGORITHM
@@ -33,12 +33,14 @@ def decode_token(token: str) -> TokenPayload:
             token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
         return TokenPayload(**payload)
+    except jwt.ExpiredSignatureError as exc:
+        raise ExpiredTokenError("Token expired") from exc
     except jwt.InvalidTokenError as exc:
-        raise ValueError("Invalid Token") from exc
+        raise InvalidTokenError("Invalid token") from exc
 
 
 def validate_access_token(token: str) -> TokenPayload:
     payload = decode_token(token)
-    if payload.type != "access":
-        raise ValueError("Invalid token type")
+    if payload != "access":
+        raise InvalidTokenError("Token is not an access token")
     return payload

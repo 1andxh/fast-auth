@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import uuid
 from datetime import datetime
 from sqlalchemy import (
@@ -16,6 +18,9 @@ from sqlalchemy.orm import (
 )
 from src.db import Base
 
+if TYPE_CHECKING:
+    from src.models import Session
+
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
@@ -23,11 +28,11 @@ class RefreshToken(Base):
     __table_args__ = (
         CheckConstraint(
             "expires_at > created_at",
-            name="chk_token_expiry_chronology",
+            name="chk_token_expiry",
         ),
         CheckConstraint(
             "revoked_at IS NULL OR revoked_at >= created_at",
-            name="chk_token_revocation_chronology",
+            name="chk_token_revocation",
         ),
         Index(
             "ix_refresh_family_revoked",

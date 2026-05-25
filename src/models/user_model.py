@@ -1,9 +1,14 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from datetime import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import Boolean, DateTime, String, func
 from src.db.base import Base
+
+if TYPE_CHECKING:
+    from src.models import Session
 
 
 class User(Base):
@@ -23,4 +28,12 @@ class User(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    # relationships
+    sessions = relationship(
+        "Session",
+        back_populates="users",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )

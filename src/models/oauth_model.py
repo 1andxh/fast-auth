@@ -1,5 +1,7 @@
-from src.db import Base
+# from src.db import Base
 
 
-class OAuthUSer(Base):
-    __tablename__ = "oauth_users"
+# class OAuthUSer(Base):
+#     __tablename__ = "oauth_users"
+
+#     pass

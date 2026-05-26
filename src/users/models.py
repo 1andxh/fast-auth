@@ -8,7 +8,7 @@ from sqlalchemy import Boolean, DateTime, String, func
 from src.db.base import Base
 
 if TYPE_CHECKING:
-    from src.models import Session
+    from src.auth import Session
 
 
 class User(Base):

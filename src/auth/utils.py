@@ -41,6 +41,6 @@ def decode_token(token: str) -> TokenPayload:
 
 def validate_access_token(token: str) -> TokenPayload:
     payload = decode_token(token)
-    if payload != "access":
+    if payload.type != "access":
         raise InvalidTokenError("Token is not an access token")
     return payload

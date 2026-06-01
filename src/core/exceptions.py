@@ -1,4 +1,29 @@
-class AuthError(Exception):
+class FastAuthError(Exception):
+    """Base exception for FastAuth"""
+
+    status_code: int
+    message: str
+
+
+# identity exception
+class UserError(FastAuthError):
+    """Base identity exception"""
+
+
+class DuplicateEmailError(UserError):
+    """Email already exists"""
+
+
+class UserNotFoundError(UserError):
+    """User does not exists or not found"""
+
+
+class UserAlreadyVerified(UserError):
+    """User already verified identity"""
+
+
+# auth exceptions
+class AuthError(FastAuthError):
     """Base authentication exception."""
 
 

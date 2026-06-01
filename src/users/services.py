@@ -1,0 +1,42 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
+from .models import User
+from .utils import normalize_email
+import uuid
+from src.core.exceptions import DuplicateEmailError
+
+
+class UserService:
+
+    async def get_user_by_email(self, session: AsyncSession, email: str) -> User | None:
+        normalized_email = normalize_email(email)
+        stmt = await session.execute(select(User).where(User.email == normalized_email))
+        return stmt.scalar_one_or_none()
+
+    async def get_user_by_id(
+        self, sessison: AsyncSession, id: uuid.UUID
+    ) -> User | None:
+        stmt = await sessison.execute(select(User).where(User.id == id))
+        return stmt.scalar_one_or_none()
+
+    async def _check_user_exists(self, session: AsyncSession, email: str) -> bool:
+        return await self.get_user_by_email(session, email) is not None
+
+    async def create_user(
+        self, session: AsyncSession, email: str, password_hash: str
+    ) -> User:
+        exists = await self._check_user_exists(session, email)
+        if exists:
+            raise DuplicateEmailError()
+        new_user = User(email=email, hashed_password=password_hash)
+        session.add(new_user)
+        try:
+            await session.flush()
+        except IntegrityError:
+            raise DuplicateEmailError()
+        return new_user
+
+    async def verify_user(self): ...
+
+    async def deactivate_user(self): ...

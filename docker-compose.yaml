@@ -31,7 +31,7 @@ services:
   
   migration:
     build: .
-    container_name: fauth-migrate
+    container_name: auth-migrate
     env_file:
       - .env
     depends_on:
@@ -44,12 +44,12 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: fauth-postgres
+    container_name: auth-postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: fauth_db
+      POSTGRES_DB: auth_db
     ports:
       - "5433:5432"
     networks:
@@ -57,10 +57,28 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d fauth_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d auth_db"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: auth-test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_test
+    ports:
+      - "5434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+      
 
   redis:
     image: redis:7-alpine

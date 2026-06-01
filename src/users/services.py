@@ -9,22 +9,20 @@ from src.core.exceptions import DuplicateEmailError
 
 class UserService:
 
-    async def get_user_by_email(self, session: AsyncSession, email: str) -> User | None:
+    async def get_by_email(self, session: AsyncSession, email: str) -> User | None:
         normalized_email = normalize_email(email)
         stmt = await session.execute(select(User).where(User.email == normalized_email))
         return stmt.scalar_one_or_none()
 
-    async def get_user_by_id(self, session: AsyncSession, id: uuid.UUID) -> User | None:
+    async def get_by_id(self, session: AsyncSession, id: uuid.UUID) -> User | None:
         return await session.get(User, id)
-
-    async def _check_user_exists(self, session: AsyncSession, email: str) -> bool:
-        return await self.get_user_by_email(session, email) is not None
 
     async def create_user(
         self, session: AsyncSession, email: str, password_hash: str
     ) -> User:
-        exists = await self._check_user_exists(session, email)
-        if exists:
+        email = normalize_email(email)
+        existing_user = await self.get_by_email(session, email)
+        if existing_user:
             raise DuplicateEmailError()
         new_user = User(email=email, hashed_password=password_hash)
         session.add(new_user)

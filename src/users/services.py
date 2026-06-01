@@ -17,8 +17,7 @@ class UserService:
     async def get_user_by_id(
         self, sessison: AsyncSession, id: uuid.UUID
     ) -> User | None:
-        stmt = await sessison.execute(select(User).where(User.id == id))
-        return stmt.scalar_one_or_none()
+        return await sessison.get(User, id)
 
     async def _check_user_exists(self, session: AsyncSession, email: str) -> bool:
         return await self.get_user_by_email(session, email) is not None

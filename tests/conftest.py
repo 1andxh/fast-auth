@@ -1,8 +1,10 @@
+import pytest
 import pytest_asyncio
 from alembic.config import Config
 from alembic import command
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
+from src import app
 from src.core.config import settings
 from src.users.services import UserService
 
@@ -13,8 +15,8 @@ TestSessionLocal = async_sessionmaker(
 )
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
-async def apply_mirgations():
+@pytest.fixture(scope="session", autouse=True)
+def apply_mirgations():
     alembic_cfg = Config("alembic.ini")
     alembic_cfg.set_main_option("sqlalchemy.url", settings.TEST_DB_URL)
     command.upgrade(alembic_cfg, "head")
@@ -28,6 +30,6 @@ async def db_session():
         await session.rollback()
 
 
-@pytest_asyncio.fixture
-async def user_service():
+@pytest.fixture
+def user_service():
     return UserService()

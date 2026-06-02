@@ -13,8 +13,6 @@ from src.core.config import settings
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
-
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -44,6 +42,9 @@ def run_migrations_offline() -> None:
     script output.
 
     """
+    if not config.get_main_option("sqlalchemy.url"):
+        config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -68,6 +69,8 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
+    if not config.get_main_option("sqlalchemy.url"):
+        config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),

@@ -28,8 +28,8 @@ class UserService:
         session.add(new_user)
         try:
             await session.flush()
-        except IntegrityError:
-            raise DuplicateEmailError()
+        except IntegrityError as exc:
+            raise DuplicateEmailError() from exc
         return new_user
 
     async def verify_user(self): ...

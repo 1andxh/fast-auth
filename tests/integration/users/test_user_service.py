@@ -39,7 +39,7 @@ async def test_get_user_by_email_normalizes_email(db_session, user_service):
     found_user = await user_service.get_by_email(db_session, email="JoHN@DOE.com")
 
     assert found_user is not None
-    assert found_user.email == "john@doe.com"
+    assert found_user.email == created_user.email
 
 
 @pytest.mark.asyncio

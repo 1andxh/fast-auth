@@ -8,7 +8,7 @@ from sqlalchemy import Boolean, DateTime, String, func
 from src.db.base import Base
 
 if TYPE_CHECKING:
-    from src.auth.models import Session
+    from src.auth.models import UserSession
 
 
 class User(Base):
@@ -32,7 +32,7 @@ class User(Base):
 
     # relationships
     sessions = relationship(
-        "Session",
+        "UserSession",
         back_populates="user",
         cascade="all, delete-orphan",
         passive_deletes=True,

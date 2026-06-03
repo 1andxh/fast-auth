@@ -34,8 +34,6 @@ async def test_get_user_by_email_normalizes_email(db_session, user_service):
         db_session, email="john@doe.com", password_hash="hash"
     )
 
-    # manual plant into db to create ?
-
     found_user = await user_service.get_by_email(db_session, email="JoHN@DOE.com")
 
     assert found_user is not None
@@ -46,11 +44,11 @@ async def test_get_user_by_email_normalizes_email(db_session, user_service):
 async def test_get_user_by_id(db_session, user_service):
     from src.users import User
 
-    dummy_user = User(email="mike@example.com", password_hash="hash")
+    dummy_user = User(email="mike@example.com", hashed_password="hash")
     db_session.add(dummy_user)
-    await db_session.commit
+    await db_session.commit()
 
-    found_user = user_service.get_by_id(db_session, id=dummy_user.id)
+    found_user = await user_service.get_by_id(db_session, id=dummy_user.id)
 
     assert found_user is not None
     assert found_user.id == dummy_user.id

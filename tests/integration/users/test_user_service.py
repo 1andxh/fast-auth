@@ -1,8 +1,6 @@
-import pytest
 import asyncio
+import pytest
 
-
-from src.users.services import UserService
 from src.core.exceptions import DuplicateEmailError
 
 
@@ -28,3 +26,31 @@ async def test_create_user_duplicate_email(db_session, user_service):
         await user_service.create_user(
             db_session, email="JOHN@doe.com", password_hash="amother-hash"
         )
+
+
+@pytest.mark.asyncio
+async def test_get_user_by_email_normalizes_email(db_session, user_service):
+    created_user = await user_service.create_user(
+        db_session, email="john@doe.com", password_hash="hash"
+    )
+
+    # manual plant into db to create ?
+
+    found_user = await user_service.get_by_email(db_session, email="JoHN@DOE.com")
+
+    assert found_user is not None
+    assert found_user.email == "john@doe.com"
+
+
+@pytest.mark.asyncio
+async def test_get_user_by_id(db_session, user_service):
+    from src.users import User
+
+    dummy_user = User(email="mike@example.com", password_hash="hash")
+    db_session.add(dummy_user)
+    await db_session.commit
+
+    found_user = user_service.get_by_id(db_session, id=dummy_user.id)
+
+    assert found_user is not None
+    assert found_user.id == dummy_user.id

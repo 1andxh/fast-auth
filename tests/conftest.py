@@ -3,12 +3,13 @@ import pytest_asyncio
 from alembic.config import Config
 from alembic import command
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.pool import NullPool
 
 from src import app
 from src.core.config import settings
 from src.users.services import UserService
 
-test_engine = create_async_engine(settings.TEST_DB_URL, echo=False)
+test_engine = create_async_engine(settings.TEST_DB_URL, echo=False, poolclass=NullPool)
 
 TestSessionLocal = async_sessionmaker(
     bind=test_engine, expire_on_commit=False, class_=AsyncSession
@@ -23,7 +24,7 @@ def apply_mirgations():
     yield
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(loop_scope="function")
 async def db_session():
     async with TestSessionLocal() as session:
         yield session

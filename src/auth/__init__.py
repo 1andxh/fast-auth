@@ -1,3 +1,3 @@
-from .models import Session, RefreshToken
+from .models import UserSession, RefreshToken
 
-__all__ = ["Session", "RefreshToken"]
+__all__ = ["UserSession", "RefreshToken"]

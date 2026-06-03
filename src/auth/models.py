@@ -19,8 +19,8 @@ if TYPE_CHECKING:
     from src.users import User
 
 
-class Session(Base):
-    __tablename__ = "sessions"
+class UserSession(Base):
+    __tablename__ = "usersessions"
 
     __table_args__ = (
         CheckConstraint(
@@ -82,7 +82,7 @@ class RefreshToken(Base):
 
     session_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("sessions.id", ondelete="CASCADE"),
+        ForeignKey("usersessions.id", ondelete="CASCADE"),
         nullable=False,
     )
 
@@ -124,6 +124,6 @@ class RefreshToken(Base):
     )
 
     session = relationship(
-        "Session",
+        "UserSession",
         back_populates="refresh_tokens",
     )

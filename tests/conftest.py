@@ -4,9 +4,11 @@ from alembic.config import Config
 from alembic import command
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.pool import NullPool
+from sqlalchemy import text
 
 from src import app
 from src.core.config import settings
+from src.db import Base
 from src.users.services import UserService
 
 test_engine = create_async_engine(settings.TEST_DB_URL, echo=False, poolclass=NullPool)
@@ -28,7 +30,17 @@ def apply_mirgations():
 async def db_session():
     async with TestSessionLocal() as session:
         yield session
-        await session.rollback()
+        await session.commit()
+
+@pytest_asyncio.fixture(autouse=True)
+async def clean_database():
+    yield
+
+    async with test_engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(
+                text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE")
+            )
 
 
 @pytest.fixture

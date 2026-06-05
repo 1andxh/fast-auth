@@ -34,3 +34,13 @@ async def db_session():
 @pytest.fixture
 def user_service():
     return UserService()
+
+@pytest.fixture
+def auth_service():
+    from src.auth.services import AuthService
+    from src.auth.security import Security
+
+    security = Security()
+    user_service = UserService()
+
+    return AuthService(user_service,security)

@@ -16,7 +16,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
     networks:
-      - default
+      - fast-auth-net
     volumes:
       - .:/app
       - /app/.venv
@@ -38,7 +38,7 @@ services:
     ports:
       - "5433:5432"
     networks:
-      - default
+      - fast-auth-net
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -58,13 +58,14 @@ services:
       - "5434:5432"
     tmpfs:
       - /var/lib/postgresql/data
+    networks:
+      - fast-auth-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d auth_test"]
       interval: 2s
       timeout: 2s
       retries: 10
       
-
   redis:
     image: redis:7-alpine
     container_name: auth-redis
@@ -72,7 +73,7 @@ services:
     ports:
       - "6380:6379"
     networks:
-      - default
+      - fast-auth-net
     volumes:
       - redis_data:/data
     healthcheck:
@@ -81,7 +82,11 @@ services:
       timeout: 3s
       retries: 5
 
+
+networks:
+  fast-auth-net:
+    driver: bridge
+
 volumes:
   postgres_data:
   redis_data:
-

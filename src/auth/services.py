@@ -25,6 +25,8 @@ class AuthService:
         await session.refresh(user)
 
         return user
+    
+
 class SessionService:
     def __init__(self, session: AsyncSession, ) -> None:
         self.session = session

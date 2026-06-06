@@ -44,7 +44,7 @@ async def test_authenticate_unknown_user(db_session, auth_service):
 
 @pytest.mark.asyncio
 async def test_authenticate_inactive_user(db_session, auth_service):
-    user = await auth_service.authenticate(db_session, email="john@doe.com", password="passpass")
+    user = await auth_service.register(db_session, email="john@doe.com", password="passpass")
 
     user.is_active = False
     await db_session.commit()

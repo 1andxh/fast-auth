@@ -103,3 +103,18 @@ class RefreshTokenReuseError(AuthError):
         self, message: str = "Refresh token reuse detected! Security breach alert."
     ) -> None:
         super().__init__(message)
+
+class InvalidCredentialsError(AuthError):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    error_code = "INVALID_AUTHENTICATION_CREDENTIALS"
+
+    def __init__(self, message: str = "Invalid authentication credentials provided") -> None:
+        super().__init__(message)
+
+class InactiveUserError(AuthError):
+    """Raised when login for an inactive user is detected"""
+    status_code = status.HTTP_401_UNAUTHORIZED
+    error_code = "INACTIVE_USER"
+
+    def __init__(self, message: str = "User account is currently inactive") -> None:
+        super().__init__(message)

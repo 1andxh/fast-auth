@@ -41,18 +41,20 @@ class UserSession(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    expires_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
     # relationships
-    user = relationship("User", back_populates="sessions")
-    refresh_tokens = relationship(
+    user: Mapped["User"] = relationship("User", back_populates="sessions")
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         "RefreshToken", back_populates="session", cascade="all, delete-orphan"
     )
 
-    @property
-    def is_revoked(self):
-        return self.revoked_at is not None
+    # @property
+    # def is_revoked(self):
+    #     return self.revoked_at is not None
+    
+    
 
 
 class RefreshToken(Base):

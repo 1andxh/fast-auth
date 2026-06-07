@@ -52,12 +52,12 @@ class UserSession(Base):
         "RefreshToken", back_populates="session", cascade="all, delete-orphan"
     )
 
-    @property
-    def is_active(self) -> bool:
-        return (
-            self.revoked_at is None 
-            and self.expires_at > datetime.now(timezone.utc)
-        )
+    # @property
+    # def is_active(self) -> bool:
+    #     return (
+    #         self.revoked_at is None 
+    #         and self.expires_at > datetime.now(timezone.utc)
+    #     )
         
     
 

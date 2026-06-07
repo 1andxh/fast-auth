@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SESSION_LIFETIME_DAYS: int = 30
 
     TEST_DB_URL: str
 

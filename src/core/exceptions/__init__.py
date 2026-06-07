@@ -1,5 +1,3 @@
-# src/core/exceptions/__init__.py
-
 from .base import FastAuthError
 from .user import UserAlreadyVerified, UserError, UserNotFoundError, DuplicateEmailError
 from .auth import AuthError, InvalidCredentialsError, InactiveUserError, ExpiredTokenError, RefreshTokenReuseError, InvalidTokenError, InvalidTokenTypeError

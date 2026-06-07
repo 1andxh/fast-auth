@@ -13,7 +13,7 @@ from sqlalchemy import (
     CheckConstraint,
     Index,
 )
-from datetime import datetime
+from datetime import datetime, timezone
 
 if TYPE_CHECKING:
     from src.users import User
@@ -41,7 +41,9 @@ class UserSession(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    expires_at: Mapped[datetime | None] = mapped_column(nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     revoked_at: Mapped[datetime | None] = mapped_column(nullable=True)
 
     # relationships
@@ -50,10 +52,13 @@ class UserSession(Base):
         "RefreshToken", back_populates="session", cascade="all, delete-orphan"
     )
 
-    # @property
-    # def is_revoked(self):
-    #     return self.revoked_at is not None
-    
+    @property
+    def is_active(self) -> bool:
+        return (
+            self.revoked_at is None 
+            and self.expires_at > datetime.now(timezone.utc)
+        )
+        
     
 
 

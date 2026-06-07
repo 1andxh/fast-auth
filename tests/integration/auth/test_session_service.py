@@ -11,7 +11,7 @@ async def _create_test_session(db_session, user=None, **kwargs) -> tuple[UserSes
         user = User(
             id=uuid.uuid4(),
             email=f"test@email.com",
-            password_hash="hashed_string"
+            hashed_password="hashed_string"
         )
         db_session.add(user)
         await db_session.flush()
@@ -45,17 +45,20 @@ async def test_create_session_succes(db_session,session_service):
 
 @pytest.mark.asyncio
 async def test_get_session_by_id(db_session, session_service):
-    session = UserSession(user_id=uuid.uuid4(), user_agent="mozilla/5.0", ip_address='127.0.01')
-    db_session.add(session)
-    await db_session.commit()
+    session, _ = await _create_test_session(db_session)
 
     found_session = await session_service.get_session_by_id(session.id)
     assert found_session is not None
     assert found_session.id == session.id
-    assert found_session.user_id == 
+
 
 @pytest.mark.asyncio
 async def test_revoke_session(db_session, session_service):
-    pass
+    session, _ = await _create_test_session(db_session)
+    assert session.revoked_at is None
+
+    await session_service.revoke_session(session)
+
+    assert session.revoked_at is not None
 
 

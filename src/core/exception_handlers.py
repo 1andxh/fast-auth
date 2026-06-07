@@ -3,7 +3,7 @@ from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 
 
-from .exceptions import FastAuthError
+from .exceptions.base import FastAuthError
 
 
 async def fast_auth_exception_handler(request: Request, exc: Exception):

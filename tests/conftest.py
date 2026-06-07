@@ -56,3 +56,9 @@ def auth_service():
     user_service = UserService()
 
     return AuthService(user_service,security)
+
+@pytest.fixture
+def session_service(db_session):
+    from src.auth.services import SessionService
+
+    return SessionService(db_session)

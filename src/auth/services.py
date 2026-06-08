@@ -14,8 +14,6 @@ from datetime import datetime, timezone, timedelta
 #     access_token: str
 #     refresh_token: str
 
-
-
 class AuthService:
     def __init__(self, user_service: UserService, security: Security) -> None:
         self.user_service = user_service
@@ -76,3 +74,22 @@ class SessionService:
         return True
         
 
+class RefreshTokenService:
+    @dataclass(slots=True, frozen=True)
+    class RefreshTokenResult:
+        refresh_token: RefreshToken # type: ignore
+        raw_token: str
+
+
+    def __init__(self, security: Security) -> None:
+        self.security = security
+
+    async def create_refresh_token(self):...
+
+    async def get_refresh_token(self):...
+
+    async def rotate_refresh_token(self):...
+
+    async def revoke_refresh_token(self):...
+
+    async def revoke_token_family(self):...

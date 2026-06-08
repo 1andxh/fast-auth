@@ -58,7 +58,17 @@ async def test_revoke_session(db_session, session_service):
     assert session.revoked_at is None
 
     await session_service.revoke_session(session)
-
     assert session.revoked_at is not None
 
+    # with pytest.raises(SessionRevokedError):
+    #     await session_service.revoke_session(session)
+
+@pytest.mark.asyncio
+async def test_validate_session_raises_if_expired(db_session, session_service):
+    past_time =  datetime.now(timezone.utc) - timedelta(days=1)
+
+    session, _ = await _create_test_session(db_session, expires_at=past_time)
+
+    with pytest.raises(SessionExpiredError):
+        await session_service.validate_session(session)
 

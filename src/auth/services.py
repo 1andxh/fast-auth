@@ -74,7 +74,7 @@ class SessionService:
         return True
         
 
-class RefreshTokenService:
+class TokenService:
     @dataclass(slots=True, frozen=True)
     class RefreshTokenResult:
         refresh_token: RefreshToken # type: ignore

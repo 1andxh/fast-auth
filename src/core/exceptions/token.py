@@ -11,17 +11,26 @@ class RefreshTokenNotFoundError(TokenError):
     """Raised when a provided refresh token does not exist in the database"""
 
     error_code = "REFRESH_TOKEN_NOT_FOUND"
-    message = "The provided refresh token is invalid or does not exist."
+
+    def __init__(self, message: str = "The provided refresh token is invalid or does not exist.") -> None:
+        super().__init__(message)
 
 
 class RefreshTokenAlreadyRevokedError(TokenError):
     """Raised when a user attempts to use or rotate a token that has already been burned"""
 
     error_code = "REFRESH_TOKEN_REVOKED"
-    message = "This refresh token has already been revoked."
+
+
+    def __init__(self, message: str = "This refresh token has already been revoked.") -> None:
+        super().__init__(message)
+
 
 class RefreshTokenExpiredError(TokenError):
     """Raised when a refresh token's lifespan has passed its expires_at timestamp"""
 
     error_code = "REFRESH_TOKEN_EXPIRED"
-    message = "This refresh token has expired. Please log in again."
+
+    def __init__(self, message: str = "This refresh token has expired. Please log in again.") -> None:
+        super().__init__(message)
+

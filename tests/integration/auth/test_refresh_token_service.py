@@ -3,11 +3,6 @@ import  asyncio
 from datetime import datetime, timezone, timedelta
 from src.core.exceptions.token import RefreshTokenNotFoundError
 
-import uuid
-from src.users import User
-from src.auth.models import RefreshToken
-
-
 @pytest.mark.asyncio
 async def test_create_refresh_token_succes(refresh_service, create_test_session):
     user_session,_ =  await create_test_session()

@@ -72,14 +72,14 @@ def session_service(db_session):
 
 @pytest.fixture
 def refresh_service(db_session):
-    from src.auth.services import TokenService
+    from src.auth.services import RefreshTokenService
     from src.auth.security import Security
 
 
     security = Security()
     session_service = SessionService(db_session)
 
-    return TokenService(security, db_session, session_service)
+    return RefreshTokenService(security, db_session, session_service)
 
 
 @pytest.fixture
@@ -111,10 +111,10 @@ def create_test_session(db_session):
     return _factory
 
 @pytest.fixture
-def create_test_refresh_token(db_session):
+def create_test_refresh_token(db_session, create_test_session):
     async def _factory(user_session=None, **kwargs):
         if not user_session:
-            user_session, _ = await create_test_session(db_session)
+            user_session, _ = await create_test_session()
         
         raw_token = "some-raw-string"
         hashed_token = "hashed-raw-token"

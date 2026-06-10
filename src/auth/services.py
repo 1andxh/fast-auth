@@ -79,7 +79,7 @@ class SessionService:
 class RefreshTokenResult:
     refresh_token: RefreshToken 
     raw_token: str
-class TokenService:
+class RefreshTokenService:
     def __init__(self, security: Security, session: AsyncSession, session_service: SessionService) -> None:
         self.security = security
         self.session =  session
@@ -100,8 +100,9 @@ class TokenService:
         await self.session.flush()
 
         return RefreshTokenResult(refresh_token=token, raw_token=raw_token)
-
-    async def get_refresh_token(self):...
+    
+    async def get_refresh_token(self, token_id: uuid.UUID) -> RefreshToken | None :
+        return await self.session.get(RefreshToken, token_id)
 
     async def rotate_refresh_token(self):...
 

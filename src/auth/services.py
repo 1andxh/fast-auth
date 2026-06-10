@@ -4,8 +4,8 @@ import uuid
 from src.users.services import UserService
 from .security import Security
 from src.users import User
-from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError
-from .models import UserSession
+from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError
+from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
 
@@ -74,17 +74,32 @@ class SessionService:
         return True
         
 
+
+@dataclass(slots=True, frozen=True)
+class RefreshTokenResult:
+    refresh_token: RefreshToken 
+    raw_token: str
 class TokenService:
-    @dataclass(slots=True, frozen=True)
-    class RefreshTokenResult:
-        refresh_token: RefreshToken # type: ignore
-        raw_token: str
-
-
-    def __init__(self, security: Security) -> None:
+    def __init__(self, security: Security, session: AsyncSession, session_service: SessionService) -> None:
         self.security = security
+        self.session =  session
+        self.session_service =  session_service
 
-    async def create_refresh_token(self):...
+    async def create_refresh_token(self, session_id: uuid.UUID,family_id: uuid.UUID | None = None) -> RefreshTokenResult:
+        user_session = await self.session_service.get_session_by_id(session_id)
+        if not user_session:
+            raise SessionNotFoundError()
+        raw_token = self.security.generate_refresh_token()
+        hashed_token = self.security.hash_refresh_token(raw_token)
+
+        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+        token = RefreshToken(session_id=user_session.id, token_hash=hashed_token, family_id=family_id or uuid.uuid4(), expires_at=expires_at)
+
+        self.session.add(token)
+        await self.session.flush()
+
+        return RefreshTokenResult(refresh_token=token, raw_token=raw_token)
 
     async def get_refresh_token(self):...
 

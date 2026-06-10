@@ -6,13 +6,11 @@ from src.core.exceptions.token import RefreshTokenNotFoundError
 import uuid
 from src.users import User
 from src.auth.models import RefreshToken
-from tests.conftest import create_test_session
-from tests.conftest import create_test_refresh_token
 
 
 @pytest.mark.asyncio
-async def test_create_refresh_token_succes(db_session, refresh_service):
-    user_session,_ =  await create_test_session(db_session)
+async def test_create_refresh_token_succes(db_session, refresh_service, create_test_session):
+    user_session,_ =  await create_test_session()
 
     result =  await refresh_service.create_refresh_token(session_id=user_session.id)
 

@@ -6,9 +6,6 @@ from src.users import User
 from src.auth.models import UserSession
 from datetime import timedelta, timezone, datetime
 
-from tests.conftest import create_test_session
-
-
 
 @pytest.mark.asyncio
 async def test_create_session_succes(db_session,session_service):
@@ -23,7 +20,7 @@ async def test_create_session_succes(db_session,session_service):
     assert session.revoked_at is None
 
 @pytest.mark.asyncio
-async def test_get_session_by_id(db_session, session_service):
+async def test_get_session_by_id(db_session, session_service, create_test_session):
     session, _ = await create_test_session(db_session) 
 
     found_session = await session_service.get_session_by_id(session.id)
@@ -32,7 +29,7 @@ async def test_get_session_by_id(db_session, session_service):
 
 
 @pytest.mark.asyncio
-async def test_revoke_session(db_session, session_service):
+async def test_revoke_session(db_session, session_service, create_test_session):
     session, _ = await create_test_session(db_session)
     assert session.revoked_at is None
 
@@ -43,7 +40,7 @@ async def test_revoke_session(db_session, session_service):
     #     await session_service.revoke_session(session)
 
 @pytest.mark.asyncio
-async def test_validate_session_raises_if_expired(db_session, session_service):
+async def test_validate_session_raises_if_expired(db_session, session_service, create_test_session):
     past_time =  datetime.now(timezone.utc) - timedelta(days=1)
 
     session, _ = await create_test_session(db_session, expires_at=past_time)

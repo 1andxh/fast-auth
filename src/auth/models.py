@@ -122,17 +122,14 @@ class RefreshToken(Base):
     )
 
     expires_at: Mapped[datetime] = mapped_column(
-        nullable=False,
+        DateTime(timezone=True), nullable=False
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        nullable=False,
-        server_default=func.now(),
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    revoked_at: Mapped[datetime | None] = mapped_column(
-        nullable=True,
-    )
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True),nullable=True)
 
     session = relationship(
         "UserSession",

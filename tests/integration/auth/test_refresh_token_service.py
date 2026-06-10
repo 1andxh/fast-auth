@@ -1,7 +1,7 @@
 import pytest
 import  asyncio
 from datetime import datetime, timezone, timedelta
-from src.core.exceptions.token import RefreshTokenNotFoundError
+from src.core.exceptions.token import RefreshTokenAlreadyRevokedError
 
 @pytest.mark.asyncio
 async def test_create_refresh_token_succes(refresh_service, create_test_session):
@@ -22,3 +22,13 @@ async def test_get_refresh_token_success(refresh_service, create_test_refresh_to
 
     assert result is not None
     assert result.id == token.id
+
+@pytest.mark.asyncio
+async def test_revoke_refresh_token(refresh_service, create_test_refresh_token):
+    token, _ = await create_test_refresh_token()
+
+    await refresh_service.revoke_refresh_token(token.id)
+
+    assert token.revoked_at is not None
+    assert token.is_revoked is True
+

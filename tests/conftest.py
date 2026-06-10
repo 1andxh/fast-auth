@@ -10,6 +10,9 @@ from src import app
 from src.core.config import settings
 from src.db import Base
 from src.users.services import UserService
+from src.auth.security import Security
+from src.auth.services import SessionService
+
 
 test_engine = create_async_engine(settings.TEST_DB_URL, echo=False, poolclass=NullPool)
 
@@ -50,7 +53,6 @@ def user_service():
 @pytest.fixture
 def auth_service():
     from src.auth.services import AuthService
-    from src.auth.security import Security
 
     security = Security()
     user_service = UserService()
@@ -59,16 +61,17 @@ def auth_service():
 
 @pytest.fixture
 def session_service(db_session):
-    from src.auth.services import SessionService
 
     return SessionService(db_session)
 
 
 @pytest.fixture
-def refresh_service():
+def refresh_service(db_session):
     from src.auth.services import TokenService
     from src.auth.security import Security
 
-    security = Security()
 
-    return TokenService(security)
+    security = Security()
+    session_service = SessionService(db_session)
+
+    return TokenService(security, db_session, session_service)

@@ -12,6 +12,11 @@ from src.db import Base
 from src.users.services import UserService
 from src.auth.security import Security
 from src.auth.services import SessionService
+from datetime import datetime, timezone, timedelta
+from src.auth.models import UserSession
+from src.users import User
+import uuid
+
 
 
 test_engine = create_async_engine(settings.TEST_DB_URL, echo=False, poolclass=NullPool)
@@ -75,3 +80,32 @@ def refresh_service(db_session):
     session_service = SessionService(db_session)
 
     return TokenService(security, db_session, session_service)
+
+
+@pytest.fixture
+def create_test_session(db_session):
+    async def _factory(user=None, **kwargs):
+        if user is None:
+            user = User(
+                id=uuid.uuid4(),
+                email=f"test@email.com",
+                hashed_password="hashed_string"
+            )
+            db_session.add(user)
+            await db_session.flush()
+
+        session_data = {
+            "user_id": user.id,
+            "user_agent": "Mozilla/5.0",
+            "ip_address": "127.0.0.1",
+            "expires_at": datetime.now(timezone.utc) + timedelta(days=7)
+        }
+        session_data.update(kwargs)
+
+        session = UserSession(**session_data)
+        db_session.add(session)
+        await db_session.flush()
+
+        return session, user
+    
+    return _factory

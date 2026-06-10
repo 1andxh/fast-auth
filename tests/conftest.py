@@ -102,11 +102,11 @@ def create_test_session(db_session):
         }
         session_data.update(kwargs)
 
-        session = UserSession(**session_data)
-        db_session.add(session)
+        usersession = UserSession(**session_data)
+        db_session.add(usersession)
         await db_session.flush()
 
-        return session, user
+        return usersession, user
     
     return _factory
 

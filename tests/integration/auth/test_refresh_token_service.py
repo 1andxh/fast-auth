@@ -32,3 +32,11 @@ async def test_revoke_refresh_token(refresh_service, create_test_refresh_token):
     assert token.revoked_at is not None
     assert token.is_revoked is True
 
+@pytest.mark.asyncio
+async def test_revoke_refresh_token_raises_if_already_revoked(refresh_service, create_test_refresh_token):
+    token, _ = await create_test_refresh_token()
+
+    await refresh_service.revoke_refresh_token(token.id, revoked_at=datetime.now(timezone.utc))
+
+    with pytest.raises(RefreshTokenAlreadyRevokedError):
+        await refresh_service.revoke_refresh_token(token.id)

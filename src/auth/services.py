@@ -4,7 +4,7 @@ import uuid
 from src.users.services import UserService
 from .security import Security
 from src.users import User
-from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError
+from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError
 from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
@@ -104,8 +104,17 @@ class RefreshTokenService:
     async def get_refresh_token(self, token_id: uuid.UUID) -> RefreshToken | None :
         return await self.session.get(RefreshToken, token_id)
 
-    async def rotate_refresh_token(self):...
+    async def revoke_refresh_token(self, token_id: uuid.UUID) -> None:
+        token =  await self.get_refresh_token(token_id)
+        if not token:
+            raise RefreshTokenNotFoundError()
+        if token.revoked_at is not None and token.is_revoked is True:
+            raise RefreshTokenAlreadyRevokedError()
+        
+        token.revoked_at = datetime.now(timezone.utc)
+        token.is_revoked = True
 
-    async def revoke_refresh_token(self):...
+        await self.session.flush()
+
 
     async def revoke_token_family(self):...

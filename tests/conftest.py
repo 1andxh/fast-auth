@@ -13,7 +13,7 @@ from src.users.services import UserService
 from src.auth.security import Security
 from src.auth.services import SessionService
 from datetime import datetime, timezone, timedelta
-from src.auth.models import UserSession
+from src.auth.models import UserSession, RefreshToken
 from src.users import User
 import uuid
 
@@ -108,4 +108,30 @@ def create_test_session(db_session):
 
         return session, user
     
+    return _factory
+
+@pytest.fixture
+def create_test_refresh_token(db_session):
+    async def _factory(user_session=None, **kwargs):
+        if not user_session:
+            user_session, _ = await create_test_session(db_session)
+        
+        raw_token = "some-raw-string"
+        hashed_token = "hashed-raw-token"
+
+        token_data = {
+            "session_id": user_session.id,
+            "token_hash": hashed_token,
+            "family_id": uuid.uuid4(),
+            "expires_at": datetime.now(timezone.utc) + timedelta(days=30),
+            "revoked_at": None
+        }
+        token_data.update(kwargs)
+
+        token = RefreshToken(**token_data)
+        db_session.add(token)
+        await db_session.flush()
+
+        return token, raw_token
+
     return _factory

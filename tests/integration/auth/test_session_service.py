@@ -6,29 +6,8 @@ from src.users import User
 from src.auth.models import UserSession
 from datetime import timedelta, timezone, datetime
 
-async def _create_test_session(db_session, user=None, **kwargs) -> tuple[UserSession, User]:
-    if user is None:
-        user = User(
-            id=uuid.uuid4(),
-            email=f"test@email.com",
-            hashed_password="hashed_string"
-        )
-        db_session.add(user)
-        await db_session.flush()
+from tests.conftest import create_test_session
 
-    session_data = {
-        "user_id": user.id,
-        "user_agent": "Mozilla/5.0",
-        "ip_address": "127.0.0.1",
-        "expires_at": datetime.now(timezone.utc) + timedelta(days=7)
-    }
-    session_data.update(kwargs)
-
-    session = UserSession(**session_data)
-    db_session.add(session)
-    await db_session.flush()
-
-    return session, user
 
 
 @pytest.mark.asyncio
@@ -45,7 +24,7 @@ async def test_create_session_succes(db_session,session_service):
 
 @pytest.mark.asyncio
 async def test_get_session_by_id(db_session, session_service):
-    session, _ = await _create_test_session(db_session)
+    session, _ = await create_test_session(db_session) 
 
     found_session = await session_service.get_session_by_id(session.id)
     assert found_session is not None
@@ -54,7 +33,7 @@ async def test_get_session_by_id(db_session, session_service):
 
 @pytest.mark.asyncio
 async def test_revoke_session(db_session, session_service):
-    session, _ = await _create_test_session(db_session)
+    session, _ = await create_test_session(db_session)
     assert session.revoked_at is None
 
     await session_service.revoke_session(session)
@@ -67,7 +46,7 @@ async def test_revoke_session(db_session, session_service):
 async def test_validate_session_raises_if_expired(db_session, session_service):
     past_time =  datetime.now(timezone.utc) - timedelta(days=1)
 
-    session, _ = await _create_test_session(db_session, expires_at=past_time)
+    session, _ = await create_test_session(db_session, expires_at=past_time)
 
     with pytest.raises(SessionExpiredError):
         await session_service.validate_session(session)

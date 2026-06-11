@@ -77,7 +77,7 @@ class SessionService:
 
 
 @dataclass(slots=True, frozen=True)
-class RefreshTokennew_token:
+class RefreshTokenResult:
     refresh_token: RefreshToken 
     raw_token: str
 class RefreshTokenService:
@@ -86,7 +86,7 @@ class RefreshTokenService:
         self.session =  session
         self.session_service =  session_service
 
-    async def create_refresh_token(self, session_id: uuid.UUID,family_id: uuid.UUID | None = None) -> RefreshTokennew_token:
+    async def create_refresh_token(self, session_id: uuid.UUID,family_id: uuid.UUID | None = None) -> RefreshTokenResult:
         user_session = await self.session_service.get_session_by_id(session_id)
         if not user_session:
             raise SessionNotFoundError()
@@ -100,12 +100,12 @@ class RefreshTokenService:
         self.session.add(token)
         await self.session.flush()
 
-        return RefreshTokennew_token(refresh_token=token, raw_token=raw_token)
+        return RefreshTokenResult(refresh_token=token, raw_token=raw_token)
     
     async def get_refresh_token(self, token_id: uuid.UUID) -> RefreshToken | None :
         return await self.session.get(RefreshToken, token_id)
     
-    async def rotate_refresh_token(self, token_id: uuid.UUID) -> RefreshTokennew_token:
+    async def rotate_refresh_token(self, token_id: uuid.UUID) -> RefreshTokenResult:
         old_token =  await self.get_refresh_token(token_id)
         if not old_token:
             raise RefreshTokenNotFoundError()
@@ -127,7 +127,7 @@ class RefreshTokenService:
         token =  await self.get_refresh_token(token_id)
         if not token:
             raise RefreshTokenNotFoundError()
-        if token.revoked_at is not None and token.is_revoked is True:
+        if token.is_revoked is True:
             raise RefreshTokenAlreadyRevokedError()
         
         token.revoked_at = datetime.now(timezone.utc)
@@ -136,8 +136,8 @@ class RefreshTokenService:
         await self.session.flush()
 
     async def revoke_token_family(self, family_id: uuid.UUID):
-        buffer_time = datetime.now(timezone.utc) + timedelta(seconds=10)
-        stmt = update(RefreshToken).where(RefreshToken.family_id == family_id).values(is_revoked=True, revoked_at=buffer_time)
+        now = datetime.now(timezone.utc)
+        stmt = update(RefreshToken).where(RefreshToken.family_id == family_id).values(is_revoked=True, revoked_at=now)
 
         await self.session.execute(stmt)
         await self.session.flush()

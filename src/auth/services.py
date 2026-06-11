@@ -8,6 +8,7 @@ from src.core.exceptions import InvalidCredentialsError, InactiveUserError, Sess
 from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
+from sqlalchemy import update
 
 # @dataclass(frozen=True)
 # class AuthToken:
@@ -103,6 +104,24 @@ class RefreshTokenService:
     
     async def get_refresh_token(self, token_id: uuid.UUID) -> RefreshToken | None :
         return await self.session.get(RefreshToken, token_id)
+    
+    async def rotate_refresh_token(self, token_id: uuid.UUID) -> RefreshTokennew_token:
+        old_token =  await self.get_refresh_token(token_id)
+        if not old_token:
+            raise RefreshTokenNotFoundError()
+        
+        if old_token.is_revoked:
+            await self.revoke_token_family(old_token.family_id)
+            raise RefreshTokenReuseError()
+        
+        await self.revoke_refresh_token(old_token.id)
+
+        new_token = await self.create_refresh_token(session_id=old_token.session_id, family_id=old_token.family_id)
+
+        new_token.refresh_token.parent_token_id = old_token.id
+
+        await self.session.flush()
+        return new_token
 
     async def revoke_refresh_token(self, token_id: uuid.UUID) -> None:
         token =  await self.get_refresh_token(token_id)
@@ -116,26 +135,15 @@ class RefreshTokenService:
 
         await self.session.flush()
 
-    async def revoke_token_family(self):...
+    async def revoke_token_family(self, family_id: uuid.UUID):
+        buffer_time = datetime.now(timezone.utc) + timedelta(seconds=10)
+        stmt = update(RefreshToken).where(RefreshToken.family_id == family_id).values(is_revoked=True, revoked_at=buffer_time)
 
-
-    async def rotate_refresh_token(self, token_id: uuid.UUID) -> RefreshTokennew_token:
-        old_token =  await self.get_refresh_token(token_id)
-        if not old_token:
-            raise RefreshTokenNotFoundError()
-        
-        if old_token.is_revoked:
-            # token reuse detection ? revoke family.
-            raise RefreshTokenReuseError()
-        
-        await self.revoke_refresh_token(old_token.id)
-
-        new_token = await self.create_refresh_token(session_id=old_token.session_id, family_id=old_token.family_id)
-
-        new_token.refresh_token.parent_token_id = old_token.id
-
+        await self.session.execute(stmt)
         await self.session.flush()
-        return new_token
+
+
+
 
 
 

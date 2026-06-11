@@ -42,4 +42,11 @@ async def test_revoke_refresh_token_raises_if_already_revoked(refresh_service, c
 
 @pytest.mark.asyncio
 async def test_rotate_refresh_token_success(refresh_service, create_test_refresh_token):
-    pass
+    old_token, _ = await create_test_refresh_token()
+
+    result = await refresh_service.rotate_refresh_token(old_token.id)
+    new_token = result.refresh_token
+
+    assert old_token.is_revoked is True
+    assert new_token.family_id == old_token.family_id
+    assert new_token.parent_token_id == old_token.id

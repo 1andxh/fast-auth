@@ -4,7 +4,7 @@ import uuid
 from src.users.services import UserService
 from .security import Security
 from src.users import User
-from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError
+from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenReuseError
 from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
@@ -76,7 +76,7 @@ class SessionService:
 
 
 @dataclass(slots=True, frozen=True)
-class RefreshTokenResult:
+class RefreshTokennew_token:
     refresh_token: RefreshToken 
     raw_token: str
 class RefreshTokenService:
@@ -85,7 +85,7 @@ class RefreshTokenService:
         self.session =  session
         self.session_service =  session_service
 
-    async def create_refresh_token(self, session_id: uuid.UUID,family_id: uuid.UUID | None = None) -> RefreshTokenResult:
+    async def create_refresh_token(self, session_id: uuid.UUID,family_id: uuid.UUID | None = None) -> RefreshTokennew_token:
         user_session = await self.session_service.get_session_by_id(session_id)
         if not user_session:
             raise SessionNotFoundError()
@@ -99,7 +99,7 @@ class RefreshTokenService:
         self.session.add(token)
         await self.session.flush()
 
-        return RefreshTokenResult(refresh_token=token, raw_token=raw_token)
+        return RefreshTokennew_token(refresh_token=token, raw_token=raw_token)
     
     async def get_refresh_token(self, token_id: uuid.UUID) -> RefreshToken | None :
         return await self.session.get(RefreshToken, token_id)
@@ -116,5 +116,26 @@ class RefreshTokenService:
 
         await self.session.flush()
 
-
     async def revoke_token_family(self):...
+
+
+    async def rotate_refresh_token(self, token_id: uuid.UUID) -> RefreshTokennew_token:
+        old_token =  await self.get_refresh_token(token_id)
+        if not old_token:
+            raise RefreshTokenNotFoundError()
+        
+        if old_token.is_revoked:
+            # token reuse detection ? revoke family.
+            raise RefreshTokenReuseError()
+        
+        await self.revoke_refresh_token(old_token.id)
+
+        new_token = await self.create_refresh_token(session_id=old_token.session_id, family_id=old_token.family_id)
+
+        new_token.refresh_token.parent_token_id = old_token.id
+
+        await self.session.flush()
+        return new_token
+
+
+

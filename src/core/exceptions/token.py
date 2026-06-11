@@ -34,3 +34,11 @@ class RefreshTokenExpiredError(TokenError):
     def __init__(self, message: str = "This refresh token has expired. Please log in again.") -> None:
         super().__init__(message)
 
+class TokenReuseError(TokenError):
+    """Raised when an expired/revoked refresh token is being reused """
+
+    error_code = "TOKEN_REUSE_DETECTED"
+
+    def __init__(self, message: str = "This refresh token has been already used") -> None:
+        super().__init__(message)
+

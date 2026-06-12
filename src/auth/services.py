@@ -9,6 +9,7 @@ from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import update
+from src.auth.utils import create_access_token
 
 # @dataclass(frozen=True)
 # class AuthToken:
@@ -80,6 +81,7 @@ class SessionService:
 class RefreshTokenResult:
     refresh_token: RefreshToken 
     raw_token: str
+
 class RefreshTokenService:
     def __init__(self, security: Security, session: AsyncSession, session_service: SessionService) -> None:
         self.security = security
@@ -141,6 +143,25 @@ class RefreshTokenService:
 
         await self.session.execute(stmt)
         await self.session.flush()
+
+
+@dataclass(slots=True, frozen=True)
+class AcessTokens:
+    access_token: str
+    refresh_token: str
+
+class TokenService:
+    def __init__(self, session_service: SessionService, refresh_token_service: RefreshTokenService) -> None:
+        self.session_service = session_service
+        self.refresh_token_service = refresh_token_service
+
+    async def create_token_pair(self, user: User, user_agent: str | None = None, ip_address: str | None = None) -> AcessTokens:
+        session = await self.session_service.create_session(user_id=user.id, user_agent=user_agent, ip_address=ip_address)
+        refresh_token =  await self.refresh_token_service.create_refresh_token(session_id=session.id)
+        access_token =  create_access_token(user_id=user.id, session_id=session.id)
+
+        return AcessTokens(access_token=access_token, refresh_token=refresh_token.raw_token)
+
 
 
 

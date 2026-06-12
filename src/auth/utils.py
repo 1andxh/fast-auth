@@ -11,13 +11,14 @@ JWT_ALGORITHM = settings.JWT_ALGORITHM
 ACCESS_TOKEN_EXPIRY_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
-def create_access_token(subject: uuid.UUID) -> str:
+def create_access_token(user_id: uuid.UUID, session_id: uuid.UUID) -> str:
     now = datetime.now(timezone.utc)
 
     expiry = now + timedelta(minutes=ACCESS_TOKEN_EXPIRY_MINUTES)
 
     payload = {
-        "sub": str(subject),
+        "sub": str(user_id),
+        "sid": str(session_id),
         "type": "access",
         "iat": int(now.timestamp()),
         "exp": int(expiry.timestamp()),

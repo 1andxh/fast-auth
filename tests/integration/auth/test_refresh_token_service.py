@@ -1,8 +1,7 @@
 import pytest
-import  asyncio
 from datetime import datetime, timezone, timedelta
 from src.core.exceptions.token import RefreshTokenAlreadyRevokedError
-import uuid
+
 
 @pytest.mark.asyncio
 async def test_create_refresh_token_succes(refresh_service, create_test_session):
@@ -67,3 +66,13 @@ async def test_rotate_refresh_token_success(refresh_service, create_test_refresh
 
 #     assert first_token.is_revoked is True
 #     assert second_token.is_revoked is True
+
+@pytest.mark.asyncio
+async def test_get_refresh_token_by_hash(refresh_service, create_test_refresh_token):
+    token, raw_token = await create_test_refresh_token()
+
+    hashed =  refresh_service.security.hash_refresh_token(raw_token)
+    result = await refresh_service.get_token_by_hash(hashed)
+
+    assert result.id == token.id
+

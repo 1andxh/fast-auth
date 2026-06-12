@@ -8,8 +8,8 @@ from src.core.exceptions import InvalidCredentialsError, InactiveUserError, Sess
 from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import update
-from src.auth.utils import create_access_token
+from sqlalchemy import update, select
+from src.auth.utils import create_access_token, validate_access_token, decode_token
 
 # @dataclass(frozen=True)
 # class AuthToken:
@@ -107,6 +107,11 @@ class RefreshTokenService:
     async def get_refresh_token(self, token_id: uuid.UUID) -> RefreshToken | None :
         return await self.session.get(RefreshToken, token_id)
     
+    async def get_token_by_hash(self, token: str) -> RefreshToken | None:
+        token_hash = self.security.hash_refresh_token(token=token)
+        stmt = await self.session.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
+        return stmt.scalar_one_or_none()
+    
     async def rotate_refresh_token(self, token_id: uuid.UUID) -> RefreshTokenResult:
         old_token =  await self.get_refresh_token(token_id)
         if not old_token:
@@ -151,9 +156,10 @@ class AcessTokens:
     refresh_token: str
 
 class TokenService:
-    def __init__(self, session_service: SessionService, refresh_token_service: RefreshTokenService) -> None:
+    def __init__(self, session_service: SessionService, refresh_token_service: RefreshTokenService, security: Security) -> None:
         self.session_service = session_service
         self.refresh_token_service = refresh_token_service
+        self.security = security
 
     async def create_token_pair(self, user: User, user_agent: str | None = None, ip_address: str | None = None) -> AcessTokens:
         session = await self.session_service.create_session(user_id=user.id, user_agent=user_agent, ip_address=ip_address)
@@ -161,6 +167,9 @@ class TokenService:
         access_token =  create_access_token(user_id=user.id, session_id=session.id)
 
         return AcessTokens(access_token=access_token, refresh_token=refresh_token.raw_token)
+
+    async def refresh_tokens(self, refresh_token: str) -> AcessTokens:...
+
 
 
 

@@ -81,6 +81,13 @@ def refresh_service(db_session):
 
     return RefreshTokenService(security, db_session, session_service)
 
+@pytest.fixture
+def token_service(session_service, refresh_service):
+    from src.auth.services import TokenService
+    
+
+    return TokenService(session_service, refresh_service)
+
 
 @pytest.fixture
 def create_test_session(db_session):
@@ -134,4 +141,16 @@ def create_test_refresh_token(db_session, create_test_session):
 
         return token, raw_token
 
+    return _factory
+
+@pytest.fixture
+def create_test_user(db_session):
+    async def _factory(email: str = "testing@email.com", password: str = "hashed_pass"):
+        user = User(email=email, hashed_password=password, is_active=True)
+
+        db_session.add(user)
+        await db_session.flush()
+
+        return user
+    
     return _factory

@@ -4,17 +4,13 @@ import uuid
 from src.users.services import UserService
 from .security import Security
 from src.users import User
-from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenReuseError
+from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenReuseError, InvalidRefreshToken
 from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import update, select
 from src.auth.utils import create_access_token, validate_access_token, decode_token
 
-# @dataclass(frozen=True)
-# class AuthToken:
-#     access_token: str
-#     refresh_token: str
 
 class AuthService:
     def __init__(self, user_service: UserService, security: Security) -> None:
@@ -151,7 +147,7 @@ class RefreshTokenService:
 
 
 @dataclass(slots=True, frozen=True)
-class AcessTokens:
+class AccessTokens:
     access_token: str
     refresh_token: str
 
@@ -161,15 +157,31 @@ class TokenService:
         self.refresh_token_service = refresh_token_service
         self.security = security
 
-    async def create_token_pair(self, user: User, user_agent: str | None = None, ip_address: str | None = None) -> AcessTokens:
+    async def issue_token_pair(self, user: User, user_agent: str | None = None, ip_address: str | None = None) -> AccessTokens:
         session = await self.session_service.create_session(user_id=user.id, user_agent=user_agent, ip_address=ip_address)
         refresh_token =  await self.refresh_token_service.create_refresh_token(session_id=session.id)
         access_token =  create_access_token(user_id=user.id, session_id=session.id)
 
-        return AcessTokens(access_token=access_token, refresh_token=refresh_token.raw_token)
+        return AccessTokens(access_token=access_token, refresh_token=refresh_token.raw_token)
 
-    async def refresh_tokens(self, refresh_token: str) -> AcessTokens:...
+    async def refresh_tokens(self, refresh_token: str) -> AccessTokens:
+        token_hash = self.security.hash_refresh_token(refresh_token)
+        stored_token = await self.refresh_token_service.get_token_by_hash(token_hash)
+        if not stored_token:
+            raise InvalidRefreshToken()
+        if stored_token.is_revoked:
+            await self.session_service.revoke_session(stored_token.session_id)
+            raise SessionRevokedError()
+        
+        session = await self.session_service.get_session_by_id(stored_token.session_id)
+        if not session :
+            raise SessionNotFoundError()
+        await self.session_service.validate_session(session)
 
+        refreshed_token = await self.refresh_token_service.rotate_refresh_token(stored_token.id)
+        access_token = create_access_token(user_id=session.user_id, session_id=session.id)
+
+        return AccessTokens(access_token=access_token, refresh_token=refreshed_token.raw_token)
 
 
 

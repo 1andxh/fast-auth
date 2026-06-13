@@ -8,7 +8,7 @@ from src.core.exceptions import InvalidCredentialsError, InactiveUserError, Sess
 from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import update, select
+from sqlalchemy import update, select, func
 from src.auth.utils import create_access_token, validate_access_token, decode_token
 
 
@@ -57,9 +57,10 @@ class SessionService:
     async def get_session_by_id(self, session_id: uuid.UUID) -> UserSession | None:
         return await self.session.get(UserSession,session_id)
     
-    async def revoke_session(self, user_session: UserSession) -> None:
-        user_session.revoked_at = datetime.now(timezone.utc)
-        await self.session.flush()
+    async def revoke_session(self, session_id: uuid.UUID) -> None:
+        stmt = update(UserSession).where(UserSession.id == session_id).values(revoked_at=func.now())
+        await self.session.execute(stmt)
+
 
     async def validate_session(self, user_session: UserSession) -> bool:
         now = datetime.now(timezone.utc)

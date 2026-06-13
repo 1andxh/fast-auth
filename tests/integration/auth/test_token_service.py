@@ -6,7 +6,7 @@ from src.auth.utils import validate_access_token
 async def test_create_token_pair_success(token_service, create_test_user):
     user = await create_test_user()
 
-    result =  await token_service.create_token_pair(user=user)
+    result =  await token_service.issue_token_pair(user=user)
 
     assert result.access_token is not None
     assert result.refresh_token is not None
@@ -15,3 +15,18 @@ async def test_create_token_pair_success(token_service, create_test_user):
 
     assert payload.sub == user.id
     assert payload.sid is not None
+
+
+@pytest.mark.asyncio
+async def test_refresh_access_tokens(token_service, create_test_user):
+    user = await create_test_user()
+
+    tokens = await token_service.issue_token_pair(user=user)
+
+    refreshed = await token_service.refresh_tokens(tokens.refresh_token)
+
+    assert refreshed.access_token is not None
+    assert refreshed.refresh_token is not None
+
+    assert refreshed.refresh_token != tokens.refresh_token
+    assert refreshed.access_tokens != tokens.access_token

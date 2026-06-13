@@ -42,3 +42,11 @@ class TokenReuseError(TokenError):
     def __init__(self, message: str = "This refresh token has been already used") -> None:
         super().__init__(message)
 
+class InvalidRefreshToken(TokenError):
+    """Raised when an invalid refresh token is used for refresh"""
+
+    error_code = "INVALID_REFRESH_TOEKN"
+
+    def __init__(self, message: str = "This refresh token is invalid") -> None:
+        super().__init__(message)
+

@@ -7,7 +7,7 @@ from .session import (
     SessionRevokedError,
     SessionExpiredError,
 )
-from .token import TokenError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenExpiredError
+from .token import TokenError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenExpiredError, InvalidRefreshToken
 
 __all__ = [
     "FastAuthError",
@@ -29,5 +29,6 @@ __all__ = [
     "TokenError",
     "RefreshTokenNotFoundError",
     "RefreshTokenAlreadyRevokedError",
-    "RefreshTokenExpiredError"
+    "RefreshTokenExpiredError",
+    "InvalidRefreshToken"
 ]

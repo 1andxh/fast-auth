@@ -58,8 +58,10 @@ class SessionService:
         return await self.session.get(UserSession,session_id)
     
     async def revoke_session(self, session_id: uuid.UUID) -> None:
-        stmt = update(UserSession).where(UserSession.id == session_id).values(revoked_at=func.now())
-        await self.session.execute(stmt)
+        session = await self.get_session_by_id(session_id)
+        if session:
+            session.revoked_at = datetime.now(timezone.utc)
+            await self.session.flush()
 
 
     async def validate_session(self, user_session: UserSession) -> bool:

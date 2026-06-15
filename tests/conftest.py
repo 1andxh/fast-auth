@@ -82,13 +82,13 @@ def refresh_service(db_session):
     return RefreshTokenService(security, db_session, session_service)
 
 @pytest.fixture
-def token_service(session_service, refresh_service):
+def token_service(db_session, session_service, refresh_service):
     from src.auth.services import TokenService
     from src.auth.security import Security
 
     security = Security()
 
-    return TokenService(session_service, refresh_service, security)
+    return TokenService(db_session, session_service, refresh_service, security)
 
 
 @pytest.fixture

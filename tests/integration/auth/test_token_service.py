@@ -30,3 +30,23 @@ async def test_refresh_access_tokens(token_service, create_test_user):
 
     assert refreshed.refresh_token != tokens.refresh_token
     assert refreshed.access_tokens != tokens.access_token
+
+@pytest.mark.asyncio
+async def test_logout_success(token_service, create_test_user, db_session):
+    user = await create_test_user()
+
+    tokens = await token_service.issue_token_pair(user=user)
+
+    await token_service.logout(tokens.refresh_token)
+    db_session.expire_all()
+
+    token_hash = token_service.security.hash_refresh_token(tokens.refresh_token)
+    stored_hash =  await token_service.refresh_token_service.get_token_by_hash(token_hash)
+    if not stored_hash:
+        return
+
+    session =  await token_service.session_service.get_session_by_id(stored_hash.session_id)
+
+    assert stored_hash.is_revoked is True
+    assert session.revoked_at is not None
+    

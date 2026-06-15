@@ -33,7 +33,7 @@ async def test_revoke_session( session_service, create_test_session):
     session, _ = await create_test_session()
     assert session.revoked_at is None
 
-    await session_service.revoke_session(session)
+    await session_service.revoke_session(session.id)
     assert session.revoked_at is not None
 
     # with pytest.raises(SessionRevokedError):

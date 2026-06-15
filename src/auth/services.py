@@ -4,7 +4,7 @@ import uuid
 from src.users.services import UserService
 from .security import Security
 from src.users import User
-from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenReuseError, InvalidRefreshToken
+from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenReuseError, InvalidRefreshToken, ExpiredTokenError
 from .models import UserSession, RefreshToken
 from src.core.config import settings
 from datetime import datetime, timezone, timedelta
@@ -155,10 +155,11 @@ class AccessTokens:
     refresh_token: str
 
 class TokenService:
-    def __init__(self, session_service: SessionService, refresh_token_service: RefreshTokenService, security: Security) -> None:
+    def __init__(self, session: AsyncSession, session_service: SessionService, refresh_token_service: RefreshTokenService, security: Security) -> None:
         self.session_service = session_service
         self.refresh_token_service = refresh_token_service
         self.security = security
+        self.session = session
 
     async def issue_token_pair(self, user: User, user_agent: str | None = None, ip_address: str | None = None) -> AccessTokens:
         session = await self.session_service.create_session(user_id=user.id, user_agent=user_agent, ip_address=ip_address)
@@ -172,9 +173,16 @@ class TokenService:
         stored_token = await self.refresh_token_service.get_token_by_hash(token_hash)
         if not stored_token:
             raise InvalidRefreshToken()
+
         if stored_token.is_revoked:
+            await self.refresh_token_service.revoke_token_family(stored_token.family_id)
             await self.session_service.revoke_session(stored_token.session_id)
-            raise SessionRevokedError()
+
+            await self.session.commit()
+            raise RefreshTokenReuseError()
+
+        elif stored_token.expires_at <= datetime.now(timezone.utc):
+            raise ExpiredTokenError()
         
         session = await self.session_service.get_session_by_id(stored_token.session_id)
         if not session :

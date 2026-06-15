@@ -193,6 +193,21 @@ class TokenService:
         access_token = create_access_token(user_id=session.user_id, session_id=session.id)
 
         return AccessTokens(access_token=access_token, refresh_token=refreshed_token.raw_token)
+    
+    async def logout(self, token: str) -> None:
+        token_hash = self.security.hash_refresh_token(token=token)
+        stored_hash = await self.refresh_token_service.get_token_by_hash(token=token_hash)
+
+        if not stored_hash:
+            return
+        
+        session_id = stored_hash.session_id
+        family_id = stored_hash.family_id
+
+        await self.session_service.revoke_session(session_id=session_id)
+        await self.refresh_token_service.revoke_token_family(family_id=family_id)
+
+        await self.session.commit()
 
 
 

@@ -1,20 +1,25 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from src.db.session import get_session
+from src.db.dependency import session
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.users import User
 from src.users.services import UserService 
 from .schemas import TokenPayload
-from .services import SessionService, TokenService
+from .services import SessionService, AuthService
 from .models import UserSession
 from .utils import validate_access_token
+from .security import Security
 from src.core.exceptions import InvalidTokenError, SessionNotFoundError, UserError
 
 security =  HTTPBearer()
 
 # service dependencies
-async def get_session_service(session: AsyncSession = Depends(get_session)) -> SessionService:
+async def get_session_service(session: session) -> SessionService:
     return SessionService(session)
+
+async def get_auth_service(session: session, user_service: UserService, security: Security ) -> AuthService:
+    return AuthService(session, user_service, security)
 
 
 async def get_current_token(credentials: HTTPAuthorizationCredentials =  Depends(security)) -> TokenPayload:

@@ -13,20 +13,21 @@ from src.auth.utils import create_access_token, validate_access_token, decode_to
 
 
 class AuthService:
-    def __init__(self, user_service: UserService, security: Security) -> None:
+    def __init__(self, session: AsyncSession, user_service: UserService, security: Security) -> None:
         self.user_service = user_service
         self.security = security
+        self.session = session
 
-    async def register(self, session: AsyncSession, email: str, password: str) -> User:
+    async def register(self, email: str, password: str) -> User:
         password_hash = self.security.hash_password(password=password)
-        user = await self.user_service.create_user(session=session, email=email, password_hash=password_hash)
-        await session.commit()
-        await session.refresh(user)
+        user = await self.user_service.create_user(session=self.session, email=email, password_hash=password_hash)
+        await self.session.commit()
+        await self.session.refresh(user)
 
         return user
     
-    async def authenticate(self, session: AsyncSession, email: str, password: str) -> User:
-        user = await self.user_service.get_by_email(session, email)
+    async def authenticate(self, email: str, password: str) -> User:
+        user = await self.user_service.get_by_email(self.session, email)
         if user is None:
             raise InvalidCredentialsError()
         valid_password = self.security.verify_password(user.hashed_password, password)

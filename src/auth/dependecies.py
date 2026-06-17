@@ -11,7 +11,6 @@ from .utils import validate_access_token
 from src.core.exceptions import InvalidTokenError, SessionNotFoundError, UserError
 
 security =  HTTPBearer()
-user_service = UserService()
 
 # service dependencies
 async def get_session_service(session: AsyncSession = Depends(get_session)) -> SessionService:
@@ -35,8 +34,8 @@ async def get_current_session(service: SessionService = Depends(get_session_serv
     return session
 
 
-async def get_current_user(session: AsyncSession = Depends(get_session), user_session: UserSession = Depends(get_current_session), ) -> User:
-    user = await user_service.get_by_id(session=session, id=user_session.user_id)
+async def get_current_user(session: AsyncSession = Depends(get_session), user_session: UserSession = Depends(get_current_session), service: UserService = Depends(UserService)) -> User:
+    user = await service.get_by_id(session=session, id=user_session.user_id)
     if not user or not user.is_active:
         raise UserError("User account is diasabled or missing")
 

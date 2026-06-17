@@ -39,7 +39,7 @@ async def get_current_session(service: SessionService = Depends(get_session_serv
 
 
 async def get_current_user(session: AsyncSession = Depends(get_session), user_session: UserSession = Depends(get_current_session), ) -> User:
-    user = await user_service.get_by_id(session=session, id=user_session.id)
+    user = await user_service.get_by_id(session=session, id=user_session.user_id)
     if not user or not user.is_active:
         raise UserError("User account is diasabled or missing")
 

@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 import uuid
 
-
+# Token Schemas
 class TokenPayload(BaseModel):
     sub: uuid.UUID
     sid: uuid.UUID
@@ -9,3 +9,20 @@ class TokenPayload(BaseModel):
     exp: int
     iat: int
     jti: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    schema: str = "bearer"
+
+
+# Auth schemas
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+

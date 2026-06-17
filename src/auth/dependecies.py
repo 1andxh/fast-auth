@@ -21,10 +21,7 @@ async def get_session_service(session: AsyncSession = Depends(get_session)) -> S
 async def get_current_token(credentials: HTTPAuthorizationCredentials =  Depends(security)) -> TokenPayload:
 
     token = credentials.credentials
-    payload = validate_access_token(token=token)
-    if not payload:
-        raise InvalidTokenError()
-  
+    payload = validate_access_token(token=token)  
     return payload
 
 

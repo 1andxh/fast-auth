@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from src.core.config import settings
-from src.api.router import api_router
+from src.api.router import router
 
 version = settings.VERSION
 
@@ -13,4 +13,4 @@ async def health():
     return {"status": "ok"}
 
 
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(router, prefix="/api/v1")

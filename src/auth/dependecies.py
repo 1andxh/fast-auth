@@ -6,20 +6,31 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.users import User
 from src.users.services import UserService 
 from .schemas import TokenPayload
-from .services import SessionService, AuthService
+from .services import SessionService, AuthService, TokenService, RefreshTokenService
 from .models import UserSession
 from .utils import validate_access_token
 from .security import Security
 from src.core.exceptions import InvalidTokenError, SessionNotFoundError, UserError
+from typing import Annotated
 
 security =  HTTPBearer()
+# SessionServDep = 
+# DbSession = 
+# RefreshServDep = 
+# UserServDep
 
 # service dependencies
 async def get_session_service(session: session) -> SessionService:
     return SessionService(session)
 
-async def get_auth_service(session: session, user_service: UserService, security: Security ) -> AuthService:
-    return AuthService(session, user_service, security)
+async def get_auth_service(session: session, auth_security: Security, user_service: UserService = Depends(UserService),) -> AuthService:
+    return AuthService(session, user_service)
+
+async def get_refresh_service(session: session, user_session):
+    pass
+
+async def get_token_service(session: session, user_session: SessionService, refresh_service: RefreshTokenService, auth_security: Security) -> TokenService:
+    return TokenService(session, user_session, refresh_service,)
 
 
 async def get_current_token(credentials: HTTPAuthorizationCredentials =  Depends(security)) -> TokenPayload:

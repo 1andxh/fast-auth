@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
 import uuid
 from src.users.services import UserService
-from .security import security
+from .security import Security
 from src.users import User
 from src.core.exceptions import InvalidCredentialsError, InactiveUserError, SessionRevokedError, SessionExpiredError, SessionNotFoundError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenReuseError, InvalidRefreshToken, ExpiredTokenError
 from .models import UserSession, RefreshToken
@@ -13,23 +13,24 @@ from src.auth.utils import create_access_token, validate_access_token, decode_to
 
 
 class AuthService:
-    def __init__(self, session: AsyncSession, user_service: UserService, ) -> None:
+    def __init__(self, session: AsyncSession, user_service: UserService, security: Security) -> None:
         self.user_service = user_service
         self.session = session
+        self.security = security
 
     async def register(self, email: str, password: str) -> User:
-        password_hash = security.hash_password(password=password)
-        user = await self.user_service.create_user(session=self.session, email=email, password_hash=password_hash)
+        password_hash = self.security.hash_password(password=password)
+        user = await self.user_service.create_user(email=email, password_hash=password_hash)
         await self.session.commit()
         await self.session.refresh(user)
 
         return user
     
     async def authenticate(self, email: str, password: str) -> User:
-        user = await self.user_service.get_by_email(self.session, email)
+        user = await self.user_service.get_by_email(email)
         if user is None:
             raise InvalidCredentialsError()
-        valid_password = security.verify_password(user.hashed_password, password)
+        valid_password = self.security.verify_password(user.hashed_password, password)
         if not valid_password:
             raise InvalidCredentialsError()
         if not user.is_active:
@@ -82,16 +83,17 @@ class RefreshTokenResult:
     raw_token: str
 
 class RefreshTokenService:
-    def __init__(self, session: AsyncSession, session_service: SessionService) -> None:
+    def __init__(self, session: AsyncSession, session_service: SessionService, security: Security) -> None:
         self.session =  session
         self.session_service =  session_service
+        self.security = security
 
     async def create_refresh_token(self, session_id: uuid.UUID,family_id: uuid.UUID | None = None) -> RefreshTokenResult:
         user_session = await self.session_service.get_session_by_id(session_id)
         if not user_session:
             raise SessionNotFoundError()
-        raw_token = security.generate_refresh_token()
-        hashed_token = security.hash_refresh_token(raw_token)
+        raw_token = self.security.generate_refresh_token()
+        hashed_token = self.security.hash_refresh_token(raw_token)
 
         expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
@@ -106,7 +108,7 @@ class RefreshTokenService:
         return await self.session.get(RefreshToken, token_id)
     
     async def get_token_by_hash(self, token: str) -> RefreshToken | None:
-        token_hash = security.hash_refresh_token(token=token)
+        token_hash = self.security.hash_refresh_token(token=token)
         stmt = await self.session.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
         return stmt.scalar_one_or_none()
     
@@ -154,10 +156,11 @@ class AccessTokens:
     refresh_token: str
 
 class TokenService:
-    def __init__(self, session: AsyncSession, session_service: SessionService, refresh_token_service: RefreshTokenService) -> None:
+    def __init__(self, session: AsyncSession, session_service: SessionService, refresh_token_service: RefreshTokenService, security: Security) -> None:
         self.session_service = session_service
         self.refresh_token_service = refresh_token_service
         self.session = session
+        self.security = security
 
     async def issue_token_pair(self, user: User, user_agent: str | None = None, ip_address: str | None = None) -> AccessTokens:
         session = await self.session_service.create_session(user_id=user.id, user_agent=user_agent, ip_address=ip_address)
@@ -167,7 +170,7 @@ class TokenService:
         return AccessTokens(access_token=access_token, refresh_token=refresh_token.raw_token)
 
     async def refresh_tokens(self, refresh_token: str) -> AccessTokens:
-        token_hash = security.hash_refresh_token(refresh_token)
+        token_hash = self.security.hash_refresh_token(refresh_token)
         stored_token = await self.refresh_token_service.get_token_by_hash(token_hash)
         if not stored_token:
             raise InvalidRefreshToken()
@@ -193,7 +196,7 @@ class TokenService:
         return AccessTokens(access_token=access_token, refresh_token=refreshed_token.raw_token)
     
     async def logout(self, token: str) -> None:
-        token_hash = security.hash_refresh_token(token=token)
+        token_hash = self.security.hash_refresh_token(token=token)
         stored_hash = await self.refresh_token_service.get_token_by_hash(token=token_hash)
 
         if not stored_hash:

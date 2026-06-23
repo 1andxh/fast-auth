@@ -5,9 +5,9 @@ from src.core.exceptions import DuplicateEmailError
 
 
 @pytest.mark.asyncio
-async def test_create_user_success(db_session, user_service):
+async def test_create_user_success(user_service):
     user = await user_service.create_user(
-        db_session, email="john@doe.com", password_hash="hashed-password"
+        email="john@doe.com", password_hash="hashed-password"
     )
     assert user.id is not None
     assert user.email == "john@doe.com"
@@ -17,24 +17,24 @@ async def test_create_user_success(db_session, user_service):
 
 
 @pytest.mark.asyncio
-async def test_create_user_duplicate_email(db_session, user_service):
+async def test_create_user_duplicate_email(user_service):
     await user_service.create_user(
-        db_session, email="john@doe.com", password_hash="hash"
+        email="john@doe.com", password_hash="hash"
     )
 
     with pytest.raises(DuplicateEmailError):
         await user_service.create_user(
-            db_session, email="JOHN@doe.com", password_hash="amother-hash"
+            email="JOHN@doe.com", password_hash="amother-hash"
         )
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_email_normalizes_email(db_session, user_service):
+async def test_get_user_by_email_normalizes_email(user_service):
     created_user = await user_service.create_user(
-        db_session, email="john@doe.com", password_hash="hash"
+        email="john@doe.com", password_hash="hash"
     )
 
-    found_user = await user_service.get_by_email(db_session, email="JoHN@DOE.com")
+    found_user = await user_service.get_by_email(email="JoHN@DOE.com")
 
     assert found_user is not None
     assert found_user.email == created_user.email
@@ -48,7 +48,7 @@ async def test_get_user_by_id(db_session, user_service):
     db_session.add(dummy_user)
     await db_session.commit()
 
-    found_user = await user_service.get_by_id(db_session, id=dummy_user.id)
+    found_user = await user_service.get_by_id(id=dummy_user.id)
 
     assert found_user is not None
     assert found_user.id == dummy_user.id

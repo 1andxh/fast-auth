@@ -3,4 +3,4 @@ from .session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
-session = Annotated[AsyncSession, Depends(get_session)]
+DbSession = Annotated[AsyncSession, Depends(get_session)]

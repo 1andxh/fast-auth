@@ -15,6 +15,8 @@ class TokenResponse(BaseModel):
     refresh_token: str
     type: str = "bearer"
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 # Auth schemas
 class RegisterRequest(BaseModel):

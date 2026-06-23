@@ -13,7 +13,7 @@ class TokenPayload(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
-    schema: str = "bearer"
+    type: str = "bearer"
 
 
 # Auth schemas

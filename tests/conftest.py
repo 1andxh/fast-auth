@@ -17,6 +17,8 @@ from src.auth.models import UserSession, RefreshToken
 from src.users import User
 import uuid
 
+from httpx import AsyncClient, ASGITransport
+
 
 
 test_engine = create_async_engine(settings.TEST_DB_URL, echo=False, poolclass=NullPool)
@@ -52,17 +54,17 @@ async def clean_database():
 
 
 @pytest.fixture
-def user_service():
-    return UserService()
+def user_service(db_session):
+    return UserService(db_session)
 
 @pytest.fixture
-def auth_service():
+def auth_service(db_session):
     from src.auth.services import AuthService
 
     security = Security()
-    user_service = UserService()
+    user_service = UserService(db_session)
 
-    return AuthService(user_service,security)
+    return AuthService( db_session, user_service,security)
 
 @pytest.fixture
 def session_service(db_session):
@@ -79,7 +81,7 @@ def refresh_service(db_session):
     security = Security()
     session_service = SessionService(db_session)
 
-    return RefreshTokenService(security, db_session, session_service)
+    return RefreshTokenService(db_session, session_service, security)
 
 @pytest.fixture
 def token_service(db_session, session_service, refresh_service):
@@ -156,3 +158,4 @@ def create_test_user(db_session):
         return user
     
     return _factory
+

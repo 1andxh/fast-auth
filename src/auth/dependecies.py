@@ -18,16 +18,18 @@ async def get_session_service(session: DbSession) -> SessionService:
 
 SessionServDep = Annotated[SessionService, Depends(get_session_service)]
 
-# --- deps that build on the base ones ---
+
 async def get_auth_service(session: DbSession, security: SecurityDep, user_service: UserServDep) -> AuthService:
     return AuthService(session, user_service, security)
 
 AuthServDep = Annotated[AuthService, Depends(get_auth_service)]
 
+
 async def get_refresh_service(session: DbSession, security: SecurityDep, service: SessionServDep) -> RefreshTokenService:
     return RefreshTokenService(session, service, security)
 
 RefreshServDep = Annotated[RefreshTokenService, Depends(get_refresh_service)]
+
 
 async def get_token_service(session: DbSession, user_session: SessionServDep, refresh_service: RefreshServDep, security: SecurityDep) -> TokenService:
     return TokenService(session, user_session, refresh_service, security)
@@ -36,14 +38,12 @@ TokenServDep = Annotated[TokenService, Depends(get_token_service)]
 
 
 async def get_current_token(credentials: HTTPAuthorizationCredentials =  Depends(http_security)) -> TokenPayload:
-
     token = credentials.credentials
     payload = validate_access_token(token=token)  
     return payload
 
 
-async def get_current_session(service: SessionServDep, payload: TokenPayload = Depends(get_current_token)) -> UserSession:
-    
+async def get_current_session(service: SessionServDep, payload: TokenPayload = Depends(get_current_token)) -> UserSession:   
     session = await service.get_session_by_id(payload.sid)
     if not session:
         raise SessionNotFoundError()

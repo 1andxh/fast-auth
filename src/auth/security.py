@@ -36,3 +36,7 @@ class Security:
 
 
 security = Security()
+
+
+def get_security() -> Security:
+    return security

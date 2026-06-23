@@ -3,7 +3,7 @@ from src.users.schemas import UserResponse
 from src.users.models import User
 from .schemas import RegisterRequest, LoginRequest, TokenResponse, TokenPayload
 from .dependecies import get_current_user
-from src.auth.annotations import AuthServDep, TokenServDep
+from src.auth.dependecies import AuthServDep, TokenServDep
 
 auth_router = APIRouter(prefix="/auth")
 

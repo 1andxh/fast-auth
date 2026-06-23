@@ -10,12 +10,13 @@ from src import app
 from src.core.config import settings
 from src.db import Base
 from src.users.services import UserService
-from src.auth.security import Security
+from src.auth.security import Security, security
 from src.auth.services import SessionService
 from datetime import datetime, timezone, timedelta
 from src.auth.models import UserSession, RefreshToken
 from src.users import User
 import uuid
+import secrets
 
 from httpx import AsyncClient, ASGITransport
 
@@ -83,6 +84,7 @@ def refresh_service(db_session):
 
     return RefreshTokenService(db_session, session_service, security)
 
+
 @pytest.fixture
 def token_service(db_session, session_service, refresh_service):
     from src.auth.services import TokenService
@@ -127,8 +129,8 @@ def create_test_refresh_token(db_session, create_test_session):
         if not user_session:
             user_session, _ = await create_test_session()
         
-        raw_token = "some-raw-string"
-        hashed_token = "hashed-raw-token"
+        raw_token = secrets.token_urlsafe(32)
+        hashed_token = security.hash_refresh_token(raw_token)
 
         token_data = {
             "session_id": user_session.id,
@@ -159,3 +161,8 @@ def create_test_user(db_session):
     
     return _factory
 
+
+@pytest.fixture
+async def client():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as client:
+        yield client

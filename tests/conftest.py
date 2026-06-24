@@ -29,6 +29,8 @@ TestSessionLocal = async_sessionmaker(
     bind=test_engine, expire_on_commit=False, class_=AsyncSession
 )
 
+API_PREFIX = "api/v1/auth"
+
 
 @pytest.fixture(scope="session", autouse=True)
 def apply_mirgations():
@@ -54,9 +56,9 @@ async def clean_database():
                 text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE")
             )
 
-@pytest.fixture()
+@pytest_asyncio.fixture()
 async def client(db_session):
-    app.dependency_overrides[get_session] = db_session
+    app.dependency_overrides[get_session] = lambda: db_session
     async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as ac:
         yield ac
     app.dependency_overrides.clear()

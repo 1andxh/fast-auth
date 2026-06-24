@@ -11,7 +11,7 @@ async def fast_auth_exception_handler(request: Request, exc: Exception):
         return JSONResponse(
             status_code=exc.status_code,
             content={
-                "error": exc.__class__.__name__,
+                "error": exc.error_code,
                 "message": exc.message,
             },
         )
@@ -29,7 +29,7 @@ async def request_validation_handler(request: Request, exc: RequestValidationErr
         for error in exc.errors()
     ]
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "error": "VALIDATION_ERROR",
             "message": "The request payload contains invalid or missing data.",
@@ -43,7 +43,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
-            "error_code": "INTERNAL_SERVER_ERROR",
-            "message": "An unexpected error occurred on our end. Please try again later.",
+            "error": "INTERNAL_SERVER_ERROR",
+            "message": "An unexpected error occurred.",
         },
     )

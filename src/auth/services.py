@@ -195,9 +195,7 @@ class TokenService:
         return AccessTokens(access_token=access_token, refresh_token=refreshed_token.raw_token)
     
     async def logout(self, token: str) -> None:
-        token_hash = self.security.hash_refresh_token(token=token)
-        stored_hash = await self.refresh_token_service.get_token_by_hash(token=token_hash)
-
+        stored_hash = await self.refresh_token_service.get_token_by_hash(token=token)
         if not stored_hash:
             return
         

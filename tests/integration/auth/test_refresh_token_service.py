@@ -71,8 +71,8 @@ async def test_rotate_refresh_token_success(refresh_service, create_test_refresh
 async def test_get_refresh_token_by_hash(refresh_service, create_test_refresh_token):
     token, raw_token = await create_test_refresh_token()
 
-    hashed =  refresh_service.security.hash_refresh_token(raw_token)
-    result = await refresh_service.get_token_by_hash(hashed)
+    result = await refresh_service.get_token_by_hash(raw_token)
 
+    assert result is not None
     assert result.id == token.id
 

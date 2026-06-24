@@ -170,8 +170,7 @@ class TokenService:
         return AccessTokens(access_token=access_token, refresh_token=refresh_token.raw_token)
 
     async def refresh_tokens(self, refresh_token: str) -> AccessTokens:
-        token_hash = self.security.hash_refresh_token(refresh_token)
-        stored_token = await self.refresh_token_service.get_token_by_hash(token_hash)
+        stored_token = await self.refresh_token_service.get_token_by_hash(refresh_token)
         if not stored_token:
             raise InvalidRefreshToken()
 

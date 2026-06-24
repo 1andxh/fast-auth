@@ -54,7 +54,7 @@ async def clean_database():
                 text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE")
             )
 
-@pytest.fixture
+@pytest.fixture()
 async def client(db_session):
     app.dependency_overrides[get_session] = db_session
     async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as ac:

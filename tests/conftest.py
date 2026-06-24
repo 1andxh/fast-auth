@@ -19,6 +19,7 @@ import uuid
 import secrets
 
 from httpx import AsyncClient, ASGITransport
+from src.db.session import get_session
 
 
 
@@ -52,6 +53,13 @@ async def clean_database():
             await conn.execute(
                 text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE")
             )
+
+@pytest.fixture
+async def client(db_session):
+    app.dependency_overrides[get_session] = db_session
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as ac:
+        yield ac
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -162,7 +170,3 @@ def create_test_user(db_session):
     return _factory
 
 
-@pytest.fixture
-async def client():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as client:
-        yield client

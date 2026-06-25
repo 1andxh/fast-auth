@@ -162,12 +162,13 @@ def create_test_refresh_token(db_session, create_test_session):
 @pytest.fixture
 def create_test_user(db_session):
     async def _factory(email: str = "testing@email.com", password: str = "hashed_pass"):
-        user = User(email=email, hashed_password=password, is_active=True)
+        hashed = security.hash_password(password=password)
+        user = User(email=email, hashed_password=hashed, is_active=True)
 
         db_session.add(user)
         await db_session.flush()
 
-        return user
+        return user, password
     
     return _factory
 

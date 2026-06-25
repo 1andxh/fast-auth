@@ -5,6 +5,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.responses import Response
 from .logging.context import request_id_ctx
 from structlog.contextvars import bind_contextvars, clear_contextvars
+from .logging.logger import logger
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -16,8 +17,18 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         bind_contextvars(request_id=request_id)
 
         start = time.perf_counter()
+
+        logger.info("request_started", method=request.method, path=request.url.path)
         response = await call_next(request)
+
         duration = time.perf_counter() - start
+        logger.info(
+            "request_completed",
+            method=request.method,
+            path=request.url.path,
+            duration=duration,
+            status_code=response.status_code,
+        )
 
         response.headers["X-Process-time"] = str(duration)
         response.headers["X-Request-ID"] = request_id

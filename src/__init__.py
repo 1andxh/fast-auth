@@ -1,4 +1,9 @@
 from fastapi import FastAPI
+
+from src.core.logging.logger import configure_logging
+
+configure_logging()  # should run before any module that calls logger instance at import
+
 from src.core.config import settings
 from src.api.router import router
 from src.core.middleware import RequestIDMiddleware

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from src.core.config import settings
 from src.api.router import router
+from src.core.middleware import RequestIDMiddleware
 
 version = settings.VERSION
 
@@ -14,3 +15,6 @@ async def health():
 
 
 app.include_router(router, prefix="/api/v1")
+
+# middleware
+app.add_middleware(RequestIDMiddleware)

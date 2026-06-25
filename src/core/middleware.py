@@ -1,16 +1,21 @@
 import uuid
-
+import time
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
-from contextvars import ContextVar
+from .logging.context import request_id_ctx
 
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        request.state.request_id = str(uuid.uuid4())
+        request_id = str(uuid.uuid4())
+        request_id_ctx.set(request_id)
 
+        start =  time.perf_counter()
         response = await call_next(request)
-        response.headers["X-Request-ID"] =  request.state.request_id
+        duration = time.perf_counter() - start
+        
+        response.headers["X-Process_time"] = str(duration)
+        response.headers["X-Request-ID"] =  request_id
         return response

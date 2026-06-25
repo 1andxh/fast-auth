@@ -4,7 +4,7 @@ from src.auth.utils import validate_access_token
 
 @pytest.mark.asyncio
 async def test_create_token_pair_success(token_service, create_test_user):
-    user = await create_test_user()
+    user, _ = await create_test_user()
 
     result =  await token_service.issue_token_pair(user=user)
 
@@ -19,7 +19,7 @@ async def test_create_token_pair_success(token_service, create_test_user):
 
 @pytest.mark.asyncio
 async def test_refresh_access_tokens(token_service, create_test_user):
-    user = await create_test_user()
+    user, _ = await create_test_user()
 
     tokens = await token_service.issue_token_pair(user=user)
 
@@ -33,7 +33,7 @@ async def test_refresh_access_tokens(token_service, create_test_user):
 
 @pytest.mark.asyncio
 async def test_logout_success(token_service, create_test_user, db_session):
-    user = await create_test_user()
+    user, _ = await create_test_user()
 
     tokens = await token_service.issue_token_pair(user=user)
 

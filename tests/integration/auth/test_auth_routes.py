@@ -4,8 +4,8 @@ from tests.conftest import API_PREFIX
 
 @pytest.mark.asyncio
 async def test_get_current_user(client, create_test_user):
-    user = await create_test_user()
-    login = await client.post(f"{API_PREFIX}login", json={"email": user.email, "password": "password"})
+    user, password = await create_test_user()
+    login = await client.post(f"{API_PREFIX}/login", json={"email": user.email, "password": password})
     token = login.json()["access_token"]
 
     response = await client.get(f"{API_PREFIX}/me", headers={"Authorization": f"Bearer {token}"})
@@ -25,8 +25,8 @@ async def tests_register_success(client):
 
 @pytest.mark.asyncio
 async def test_login_success(client, create_test_user):
-    user = await create_test_user()
-    response = await client.post(f"{API_PREFIX}/login", json={"email": user.email, "password": "password"})
+    user, password = await create_test_user()
+    response = await client.post(f"{API_PREFIX}/login", json={"email": user.email, "password": password})
 
     print(response.status_code, response.json())
     

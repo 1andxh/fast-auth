@@ -16,6 +16,6 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         duration = time.perf_counter() - start
         
-        response.headers["X-Process_time"] = str(duration)
+        response.headers["X-Process-time"] = str(duration)
         response.headers["X-Request-ID"] =  request_id
         return response

@@ -7,7 +7,13 @@ configure_logging()  # should run before any module that calls logger instance a
 from src.core.config import settings
 from src.api.router import router
 from src.core.middleware import RequestIDMiddleware
-from src.core.logging.context import request_id_ctx
+from src.core.exception_handlers import (
+    FastAuthError,
+    fast_auth_exception_handler,
+    general_exception_handler,
+    RequestValidationError,
+    request_validation_handler,
+)
 
 version = settings.VERSION
 
@@ -24,3 +30,8 @@ app.include_router(router, prefix="/api/v1")
 
 # middleware
 app.add_middleware(RequestIDMiddleware)
+
+# exceptions
+app.add_exception_handler(FastAuthError, fast_auth_exception_handler)
+app.add_exception_handler(RequestValidationError, request_validation_handler)  # type: ignore
+app.add_exception_handler(Exception, general_exception_handler)

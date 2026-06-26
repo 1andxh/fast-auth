@@ -4,6 +4,7 @@ from fastapi.exceptions import RequestValidationError
 
 
 from .exceptions.base import FastAuthError
+from src.core.logging.logger import logger
 
 
 async def fast_auth_exception_handler(request: Request, exc: Exception):
@@ -39,7 +40,7 @@ async def request_validation_handler(request: Request, exc: RequestValidationErr
 
 
 async def general_exception_handler(request: Request, exc: Exception):
-    # log traceback for audit
+    logger.exception("unhandled_exception", path=str(request.url.path))
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={

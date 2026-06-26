@@ -30,7 +30,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
             status_code=response.status_code,
         )
 
-        response.headers["X-Process-time"] = str(duration)
+        response.headers["X-Process-time"] = f"{duration:.4f}"
         response.headers["X-Request-ID"] = request_id
 
         clear_contextvars()

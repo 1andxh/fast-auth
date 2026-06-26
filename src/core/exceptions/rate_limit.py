@@ -8,5 +8,7 @@ class RateLimitExceededError(FastAuthError):
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
     error_code = "RATE_LIMIT_EXCEEDED"
 
-    def __init__(self, message: str = "Too many requests") -> None:
+    def __init__(
+        self, message: str = "Too many requests. Please try again later"
+    ) -> None:
         super().__init__(message)

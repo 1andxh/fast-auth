@@ -10,6 +10,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "authlib>=1.7.2",
     "cryptography>=48.0.0",
+    "fastapi-cap>=0.2.0",
     "fastapi[standard]>=0.136.1",
     "pwdlib>=0.3.0",
     "pyjwt>=2.12.1",

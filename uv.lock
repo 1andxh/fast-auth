@@ -333,6 +333,7 @@ dependencies = [
     { name = "authlib" },
     { name = "cryptography" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "fastapi-cap" },
     { name = "pwdlib" },
     { name = "pyjwt" },
     { name = "redis" },
@@ -355,6 +356,7 @@ requires-dist = [
     { name = "authlib", specifier = ">=1.7.2" },
     { name = "cryptography", specifier = ">=48.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.136.1" },
+    { name = "fastapi-cap", specifier = ">=0.2.0" },
     { name = "pwdlib", specifier = ">=0.3.0" },
     { name = "pyjwt", specifier = ">=2.12.1" },
     { name = "redis", specifier = ">=7.4.0" },
@@ -396,6 +398,19 @@ standard = [
     { name = "pydantic-settings" },
     { name = "python-multipart" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[[package]]
+name = "fastapi-cap"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "redis" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/05/0c/14060d1fb38d99447ab5b772bef97e967eab5168f6d15598af6ba7065df0/fastapi_cap-0.2.0.tar.gz", hash = "sha256:8bf0d529a2d29ab955faacf63543fcbb96a6413a48c54237082ef66a34456b33", size = 14079, upload-time = "2025-07-16T06:08:05.417Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d8/33/5d8376ef6755a4e9c5b2c840962ecd1534d5f541f7ed530641437467ad24/fastapi_cap-0.2.0-py3-none-any.whl", hash = "sha256:fc1cd9b9a16c52970256456c7dc32c78859dfdf038844cd49a4ec6c94d03158f", size = 22435, upload-time = "2025-07-16T06:08:04.412Z" },
 ]
 
 [[package]]

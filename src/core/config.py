@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import RedisDsn
 
 
 class Settings(BaseSettings):
@@ -7,7 +6,7 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
 
     DATABASE_URL: str
-    REDIS_URL: RedisDsn
+    REDIS_URL: str
 
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"

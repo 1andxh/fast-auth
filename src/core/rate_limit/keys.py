@@ -11,3 +11,9 @@ async def ip_key(request: Request) -> str:
         return "Unknown"
 
     return request.client.host
+
+
+async def session_key(): ...
+
+
+async def user_key(): ...

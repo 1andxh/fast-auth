@@ -11,7 +11,7 @@ KeyFunction = Callable[[Request], Awaitable[str]]
 class Ratelimit:
     limit: int
     key_func: KeyFunction
-    minute: int
+    minute: int = 0
 
 
 class RateLimitPolicies:

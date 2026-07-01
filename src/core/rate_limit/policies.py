@@ -1,10 +1,6 @@
 from dataclasses import dataclass
-from collections.abc import Callable, Awaitable
 
-from fastapi import Request
-from .keys import ip_key
-
-KeyFunction = Callable[[Request], Awaitable[str]]
+from .keys import ip_key, KeyFunction
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,6 +15,6 @@ class Ratelimit:
 
 
 class RateLimitPolicies:
-    LOGIN = Ratelimit(limit=5, minutes=1, key_func=ip_key)
-    REGISTER = Ratelimit(limit=3, minutes=1, key_func=ip_key)
-    REFRESH = Ratelimit(limit=30, minutes=1, key_func=ip_key)
+    LOGIN_POLICY = Ratelimit(limit=5, minutes=1, key_func=ip_key)
+    REGISTER_POLICY = Ratelimit(limit=3, minutes=1, key_func=ip_key)
+    REFRESH_POLICY = Ratelimit(limit=30, minutes=1, key_func=ip_key)

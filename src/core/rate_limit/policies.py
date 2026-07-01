@@ -11,10 +11,14 @@ KeyFunction = Callable[[Request], Awaitable[str]]
 class Ratelimit:
     limit: int
     key_func: KeyFunction
-    minute: int = 0
+
+    seconds: int = 0
+    minutes: int = 0
+    hours: int = 0
+    days: int = 0
 
 
 class RateLimitPolicies:
-    LOGIN = Ratelimit(limit=5, minute=1, key_func=ip_key)
-    REGISTER = Ratelimit(limit=3, minute=1, key_func=ip_key)
-    REFRESH = Ratelimit(limit=30, minute=1, key_func=ip_key)
+    LOGIN = Ratelimit(limit=5, minutes=1, key_func=ip_key)
+    REGISTER = Ratelimit(limit=3, minutes=1, key_func=ip_key)
+    REFRESH = Ratelimit(limit=30, minutes=1, key_func=ip_key)

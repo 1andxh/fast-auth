@@ -1,4 +1,4 @@
-from fastapi import Depends, Request, Response, HTTPException, status
+from fastapi import Depends, Request, Response, HTTPException
 from fastapicap import Cap, RateLimiter
 from src.core.config import settings
 from src.core.logging.logger import logger
@@ -8,7 +8,9 @@ from src.core.exceptions.rate_limit import RateLimitExceededError
 cap = Cap.init_app(settings.REDIS_URL)
 
 
-def _rate_limit_handler(request: Request, response: Response, retry_after: int):
+async def _rate_limit_handler(
+    request: Request, response: Response, retry_after: int
+) -> None:
     logger.warning(
         "rate_limit_exceeeded", path=request.url.path, retry_after=retry_after
     )
@@ -23,8 +25,11 @@ def _rate_limit_handler(request: Request, response: Response, retry_after: int):
     )
 
 
-async def limiter_dependency(policy: Ratelimit):
+def limiter_dependency(policy: Ratelimit):
     limiter = RateLimiter(
-        limit=policy.limit, key_func=policy.key_func, on_limit=_rate_limit_handler
+        limit=policy.limit,
+        minutes=policy.minutes,
+        key_func=policy.key_func,  # type: ignore
+        on_limit=_rate_limit_handler,  # type: ignore[arg-type] | ignored due to library's current annotation
     )
     return Depends(limiter)

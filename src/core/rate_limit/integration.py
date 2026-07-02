@@ -1,4 +1,5 @@
 from fastapi import Depends, Request, Response
+from fastapi.params import Depends as DependsType
 from fastapicap import RateLimiter
 
 from src.core.config import settings
@@ -38,7 +39,7 @@ def _create_rate_limiter(policy: Ratelimit) -> RateLimiter:
     )
 
 
-def _create_dependency(policy: Ratelimit):
+def _create_dependency(policy: Ratelimit) -> DependsType:
     limiter = _create_rate_limiter(policy)
 
     return Depends(limiter)

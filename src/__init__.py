@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 from src.core.logging.logger import configure_logging
 
@@ -7,6 +8,7 @@ configure_logging()  # should run before any module that calls logger instance a
 from src.core.config import settings
 from src.api.router import router
 from src.core.middleware import RequestIDMiddleware
+from fastapicap import Cap
 from src.core.exception_handlers import (
     FastAuthError,
     fast_auth_exception_handler,
@@ -16,6 +18,12 @@ from src.core.exception_handlers import (
 )
 
 version = settings.VERSION
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Cap.init_app(settings.REDIS_URL)
+    yield
 
 
 app = FastAPI(title=settings.APP_NAME, version=version)

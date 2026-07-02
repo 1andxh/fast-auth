@@ -3,7 +3,7 @@ from .base import FastAuthError
 
 
 class RateLimitExceededError(FastAuthError):
-    """Raised whne rate limit is exceeded"""
+    """Raised when rate limit is exceeded"""
 
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
     error_code = "RATE_LIMIT_EXCEEDED"
@@ -13,5 +13,6 @@ class RateLimitExceededError(FastAuthError):
         retry_after: int | None = None,
         message: str = "Too many requests. Please try again later",
     ) -> None:
-        super().__init__(message)
+        headers = {"Retry-After": str(retry_after)} if retry_after is not None else None
+        super().__init__(message, headers=headers)
         self.retry_after = retry_after

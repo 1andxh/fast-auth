@@ -12,8 +12,10 @@ class FastAuthError(Exception):
         message: str,
         status_code: int | None = None,
         error_code: str | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         self.message = message
         self.status_code = status_code or self.status_code
         self.error_code = error_code or self.error_code
+        self.headers = headers
         super().__init__(message)

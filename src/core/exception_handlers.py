@@ -15,6 +15,7 @@ async def fast_auth_exception_handler(request: Request, exc: Exception):
                 "error": exc.error_code,
                 "message": exc.message,
             },
+            headers=exc.headers,
         )
 
     return await general_exception_handler(request, exc)

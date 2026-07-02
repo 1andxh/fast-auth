@@ -1,5 +1,5 @@
 from fastapi import Depends, Request, Response
-from fastapicap import Cap, RateLimiter
+from fastapicap import RateLimiter
 
 from src.core.config import settings
 from src.core.logging.logger import logger
@@ -10,8 +10,6 @@ from src.core.rate_limit.policies import (
     REGISTER_POLICY,
 )
 from src.core.exceptions.rate_limit import RateLimitExceededError
-
-cap = Cap.init_app(settings.REDIS_URL)
 
 
 async def _on_rate_limit(

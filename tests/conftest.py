@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.pool import NullPool
 from sqlalchemy import text
 from asgi_lifespan import LifespanManager
+from fastapicap import Cap
 
 from src import app
 from src.core.config import settings
@@ -55,6 +56,10 @@ async def clean_database():
             await conn.execute(
                 text(f"TRUNCATE TABLE {table.name} RESTART IDENTITY CASCADE")
             )
+
+    if Cap.redis is not None:
+        await Cap.redis.flushdb()
+        await Cap.redis.aclose()
 
 
 @pytest_asyncio.fixture()

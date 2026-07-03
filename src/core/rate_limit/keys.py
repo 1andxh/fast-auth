@@ -1,5 +1,6 @@
 from fastapi import Request
 from collections.abc import Callable, Awaitable
+from src.core.logging.logger import logger
 
 KeyFunction = Callable[[Request], Awaitable[str]]
 
@@ -10,6 +11,11 @@ async def ip_key(request: Request) -> str:
 
     """
     client = request.client
+    logger.info(
+        "rate_limit_key",
+        key=request.client.host if request.client is not None else None,
+    )
+
     forwarded_client = request.headers.get("X-Forwarded-FOR")
     if forwarded_client:
         return forwarded_client.split(",")[0].strip()

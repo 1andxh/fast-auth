@@ -17,7 +17,7 @@ async def _on_rate_limit(
     request: Request, response: Response, retry_after: int
 ) -> None:
     logger.warning(
-        "rate_limit_exceeeded",
+        "rate_limit_exceeded",
         path=request.url.path,
         method=request.method,
         retry_after=retry_after,

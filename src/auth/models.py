@@ -1,19 +1,22 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from src.db import Base
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+
 import uuid
-from sqlalchemy.dialects.postgresql import UUID, INET
+from datetime import datetime
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
-    ForeignKey,
-    String,
     Boolean,
-    DateTime,
-    func,
     CheckConstraint,
+    DateTime,
+    ForeignKey,
     Index,
+    String,
+    func,
 )
-from datetime import datetime, timezone
+from sqlalchemy.dialects.postgresql import INET, UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.db import Base
 
 if TYPE_CHECKING:
     from src.users import User

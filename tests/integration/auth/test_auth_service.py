@@ -1,6 +1,8 @@
+
 import pytest
-import asyncio
+
 from src.core.exceptions import DuplicateEmailError, InactiveUserError, InvalidCredentialsError
+
 
 @pytest.mark.asyncio
 async def test_register_user(auth_service):

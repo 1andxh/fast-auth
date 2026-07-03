@@ -1,10 +1,12 @@
-import uuid
 import time
+import uuid
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
-from .logging.context import request_id_ctx
 from structlog.contextvars import bind_contextvars, clear_contextvars
+
+from .logging.context import request_id_ctx
 from .logging.logger import logger
 
 

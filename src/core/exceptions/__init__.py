@@ -1,13 +1,27 @@
+from .auth import (
+    AuthError,
+    ExpiredTokenError,
+    InactiveUserError,
+    InvalidCredentialsError,
+    InvalidTokenError,
+    InvalidTokenTypeError,
+    RefreshTokenReuseError,
+)
 from .base import FastAuthError
-from .user import UserAlreadyVerified, UserError, UserNotFoundError, DuplicateEmailError
-from .auth import AuthError, InvalidCredentialsError, InactiveUserError, ExpiredTokenError, RefreshTokenReuseError, InvalidTokenError, InvalidTokenTypeError
 from .session import (
     SessionError,
+    SessionExpiredError,
     SessionNotFoundError,
     SessionRevokedError,
-    SessionExpiredError,
 )
-from .token import TokenError, RefreshTokenNotFoundError, RefreshTokenAlreadyRevokedError, RefreshTokenExpiredError, InvalidRefreshToken
+from .token import (
+    InvalidRefreshToken,
+    RefreshTokenAlreadyRevokedError,
+    RefreshTokenExpiredError,
+    RefreshTokenNotFoundError,
+    TokenError,
+)
+from .user import DuplicateEmailError, UserAlreadyVerified, UserError, UserNotFoundError
 
 __all__ = [
     "FastAuthError",

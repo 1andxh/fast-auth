@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 
 from src.core.exceptions import DuplicateEmailError

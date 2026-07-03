@@ -1,21 +1,23 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 
 from src.core.logging.logger import configure_logging
 
-configure_logging()  # should run before any module that calls logger instance at import
+configure_logging()
 
-from src.core.config import settings
-from src.api.router import router
-from src.core.middleware import RequestIDMiddleware
-from fastapicap import Cap
-from src.core.exception_handlers import (
+from fastapicap import Cap  # noqa: E402
+
+from src.api.router import router  # noqa: E402
+from src.core.config import settings  # noqa: E402
+from src.core.exception_handlers import (  # noqa: E402
     FastAuthError,
+    RequestValidationError,
     fast_auth_exception_handler,
     general_exception_handler,
-    RequestValidationError,
     request_validation_handler,
 )
+from src.core.middleware import RequestIDMiddleware  # noqa: E402
 
 version = settings.VERSION
 

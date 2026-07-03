@@ -2,15 +2,14 @@ from fastapi import Depends, Request, Response
 from fastapi.params import Depends as DependsType
 from fastapicap import RateLimiter
 
-from src.core.config import settings
+from src.core.exceptions.rate_limit import RateLimitExceededError
 from src.core.logging.logger import logger
 from src.core.rate_limit.policies import (
-    Ratelimit,
     LOGIN_POLICY,
     REFRESH_POLICY,
     REGISTER_POLICY,
+    Ratelimit,
 )
-from src.core.exceptions.rate_limit import RateLimitExceededError
 
 
 async def _on_rate_limit(

@@ -1,12 +1,13 @@
 import pytest
-from sqlalchemy import select
+
 from src.auth.utils import validate_access_token
+
 
 @pytest.mark.asyncio
 async def test_create_token_pair_success(token_service, create_test_user):
     user, _ = await create_test_user()
 
-    result =  await token_service.issue_token_pair(user=user)
+    result = await token_service.issue_token_pair(user=user)
 
     assert result.access_token is not None
     assert result.refresh_token is not None
@@ -31,6 +32,7 @@ async def test_refresh_access_tokens(token_service, create_test_user):
     assert refreshed.refresh_token != tokens.refresh_token
     assert refreshed.access_token != tokens.access_token
 
+
 @pytest.mark.asyncio
 async def test_logout_success(token_service, create_test_user, db_session):
     user, _ = await create_test_user()
@@ -40,13 +42,15 @@ async def test_logout_success(token_service, create_test_user, db_session):
     await token_service.logout(tokens.refresh_token)
     db_session.expire_all()
 
-
-    stored_token =  await token_service.refresh_token_service.get_token_by_hash(tokens.refresh_token)
+    stored_token = await token_service.refresh_token_service.get_token_by_hash(
+        tokens.refresh_token
+    )
     if not stored_token:
         return
 
-    session =  await token_service.session_service.get_session_by_id(stored_token.session_id)
+    session = await token_service.session_service.get_session_by_id(
+        stored_token.session_id
+    )
 
     assert stored_token.is_revoked is True
     assert session.revoked_at is not None
-    

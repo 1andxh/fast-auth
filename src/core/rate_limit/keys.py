@@ -1,5 +1,7 @@
+from collections.abc import Awaitable, Callable
+
 from fastapi import Request
-from collections.abc import Callable, Awaitable
+
 from src.core.logging.logger import logger
 
 KeyFunction = Callable[[Request], Awaitable[str]]

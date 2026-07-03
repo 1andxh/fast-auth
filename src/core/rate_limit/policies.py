@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .keys import ip_key, KeyFunction
+from .keys import KeyFunction, ip_key
 
 
 @dataclass(frozen=True, slots=True)

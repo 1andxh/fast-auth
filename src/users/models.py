@@ -1,14 +1,17 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from datetime import datetime
+
 import uuid
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from datetime import datetime
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.db.base import Base
 
 if TYPE_CHECKING:
-    from src.auth.models import UserSession
+    pass
 
 
 class User(Base):

@@ -1,10 +1,13 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
+import uuid
+
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.core.exceptions import DuplicateEmailError
+
 from .models import User
 from .utils import normalize_email
-import uuid
-from src.core.exceptions import DuplicateEmailError
 
 
 class UserService:

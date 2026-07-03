@@ -1,27 +1,27 @@
+import secrets
+import uuid
+from datetime import datetime, timedelta, timezone
+
 import pytest
 import pytest_asyncio
 from alembic.config import Config
-from alembic import command
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.pool import NullPool
-from sqlalchemy import text
 from asgi_lifespan import LifespanManager
 from fastapicap import Cap
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
+from alembic import command
 from src import app
-from src.core.config import settings
-from src.db import Base
-from src.users.services import UserService
+from src.auth.models import RefreshToken, UserSession
 from src.auth.security import Security, security
 from src.auth.services import SessionService
-from datetime import datetime, timezone, timedelta
-from src.auth.models import UserSession, RefreshToken
-from src.users import User
-import uuid
-import secrets
-
-from httpx import AsyncClient, ASGITransport
+from src.core.config import settings
+from src.db import Base
 from src.db.session import get_session
+from src.users import User
+from src.users.services import UserService
 
 test_engine = create_async_engine(settings.TEST_DB_URL, echo=False, poolclass=NullPool)
 
@@ -97,8 +97,8 @@ def session_service(db_session):
 
 @pytest.fixture
 def refresh_service(db_session):
-    from src.auth.services import RefreshTokenService
     from src.auth.security import Security
+    from src.auth.services import RefreshTokenService
 
     security = Security()
     session_service = SessionService(db_session)
@@ -108,8 +108,8 @@ def refresh_service(db_session):
 
 @pytest.fixture
 def token_service(db_session, session_service, refresh_service):
-    from src.auth.services import TokenService
     from src.auth.security import Security
+    from src.auth.services import TokenService
 
     security = Security()
 
@@ -122,7 +122,7 @@ def create_test_session(db_session):
         if user is None:
             user = User(
                 id=uuid.uuid4(),
-                email=f"test@email.com",
+                email="test@email.com",
                 hashed_password="hashed_string",
             )
             db_session.add(user)

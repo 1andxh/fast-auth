@@ -1,5 +1,7 @@
-from pydantic import BaseModel, EmailStr
 import uuid
+
+from pydantic import BaseModel, EmailStr
+
 
 # Token Schemas
 class TokenPayload(BaseModel):

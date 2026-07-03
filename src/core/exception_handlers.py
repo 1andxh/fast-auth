@@ -1,10 +1,10 @@
-from fastapi.responses import JSONResponse
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
+from src.core.logging.logger import logger
 
 from .exceptions.base import FastAuthError
-from src.core.logging.logger import logger
 
 
 async def fast_auth_exception_handler(request: Request, exc: Exception):

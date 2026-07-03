@@ -1,5 +1,7 @@
 from fastapi import status
+
 from .base import FastAuthError
+
 
 class UserError(FastAuthError):
     """Base identity exception."""

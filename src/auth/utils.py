@@ -47,3 +47,7 @@ def validate_access_token(token: str) -> TokenPayload:
     if payload.type != "access":
         raise InvalidTokenError("Token is not an access token")
     return payload
+
+
+def normalize_email(v: str) -> str:
+    return v.strip().lower()

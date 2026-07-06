@@ -6,12 +6,16 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from src.auth.annotations import SecurityDep
 from src.core.exceptions import SessionNotFoundError, UserError
 from src.db.dependency import DbSession
-from src.auth.models import User
 
-from .models import UserSession
+from .models import UserSession, User
 from .schemas import TokenPayload
-from .services import UserService
-from .services import AuthService, RefreshTokenService, SessionService, TokenService
+from .services import (
+    AuthService,
+    RefreshTokenService,
+    SessionService,
+    TokenService,
+    UserService,
+)
 from .utils import validate_access_token
 
 http_security = HTTPBearer()

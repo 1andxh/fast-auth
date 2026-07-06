@@ -14,14 +14,12 @@ from sqlalchemy.pool import NullPool
 
 from alembic import command
 from src import app
-from src.auth.models import RefreshToken, UserSession
+from src.auth.models import RefreshToken, UserSession, User
 from src.auth.security import Security, security
-from src.auth.services import SessionService
+from src.auth.services import SessionService, UserService
 from src.core.config import settings
 from src.db import Base
 from src.db.session import get_session
-from src.users import User
-from src.users.services import UserService
 
 test_engine = create_async_engine(settings.TEST_DB_URL, echo=False, poolclass=NullPool)
 

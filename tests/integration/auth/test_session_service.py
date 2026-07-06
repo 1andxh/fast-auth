@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from src.core.exceptions import SessionExpiredError
-from src.users import User
+from src.auth.models import User
 
 
 @pytest.mark.asyncio

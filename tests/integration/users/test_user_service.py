@@ -17,9 +17,7 @@ async def test_create_user_success(user_service):
 
 @pytest.mark.asyncio
 async def test_create_user_duplicate_email(user_service):
-    await user_service.create_user(
-        email="john@doe.com", password_hash="hash"
-    )
+    await user_service.create_user(email="john@doe.com", password_hash="hash")
 
     with pytest.raises(DuplicateEmailError):
         await user_service.create_user(
@@ -41,7 +39,7 @@ async def test_get_user_by_email_normalizes_email(user_service):
 
 @pytest.mark.asyncio
 async def test_get_user_by_id(db_session, user_service):
-    from src.users import User
+    from src.auth.models import User
 
     dummy_user = User(email="mike@example.com", hashed_password="hash")
     db_session.add(dummy_user)

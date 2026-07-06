@@ -3,17 +3,25 @@ from typing import Annotated
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from src.auth.annotations import SecurityDep, UserServDep
+from src.auth.annotations import SecurityDep
 from src.core.exceptions import SessionNotFoundError, UserError
 from src.db.dependency import DbSession
-from src.users import User
+from src.auth.models import User
 
 from .models import UserSession
 from .schemas import TokenPayload
+from .services import UserService
 from .services import AuthService, RefreshTokenService, SessionService, TokenService
 from .utils import validate_access_token
 
 http_security = HTTPBearer()
+
+
+async def get_user_service(session: DbSession) -> UserService:
+    return UserService(session)
+
+
+UserServDep = Annotated[UserService, Depends(get_user_service)]
 
 
 async def get_session_service(session: DbSession) -> SessionService:

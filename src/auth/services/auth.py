@@ -6,24 +6,23 @@ from src.core.exceptions import (
 )
 from src.core.logging.logger import logger
 from src.auth.models import User
-from src.auth.services import UserService
-
+from src.auth.repositories.user import UserRepository
 from src.auth.security import Security
+from auth.utils import normalize_email
 
 
 class AuthService:
     def __init__(
-        self, session: AsyncSession, user_service: UserService, security: Security
+        self, session: AsyncSession, users: UserRepository, security: Security
     ) -> None:
-        self.user_service = user_service
+        self.users = users
         self.session = session
         self.security = security
 
     async def register(self, email: str, password: str) -> User:
         password_hash = self.security.hash_password(password=password)
-        user = await self.user_service.create_user(
-            email=email, password_hash=password_hash
-        )
+        user = User(email=normalize_email(email), hashed_password=password_hash)
+        await self.users.create_user(user)
         await self.session.commit()
         await self.session.refresh(user)
 
@@ -31,7 +30,7 @@ class AuthService:
         return user
 
     async def authenticate(self, email: str, password: str) -> User:
-        user = await self.user_service.get_by_email(email)
+        user = await self.users.get_by_email(email)
         if user is None:
             logger.warning("user_login_failed", email=email, reason="user_not_found")
             raise InvalidCredentialsError()

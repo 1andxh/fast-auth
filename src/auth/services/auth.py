@@ -20,7 +20,7 @@ class AuthService:
         self.security = security
 
     async def register(self, email: str, password: str) -> User:
-        password_hash = self.security.hash_password(password=password)
+        password_hash = self.security.hash_password(password)
         user = User(email=normalize_email(email), hashed_password=password_hash)
         await self.users.create_user(user)
         await self.session.commit()
@@ -30,7 +30,7 @@ class AuthService:
         return user
 
     async def authenticate(self, email: str, password: str) -> User:
-        user = await self.users.get_by_email(email)
+        user = await self.users.find_by_email(email)
         if user is None:
             logger.warning("user_login_failed", email=email, reason="user_not_found")
             raise InvalidCredentialsError()

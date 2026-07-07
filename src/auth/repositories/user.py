@@ -12,7 +12,7 @@ class UserRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_email(self, email: str) -> User | None:
+    async def find_by_email(self, email: str) -> User | None:
         result = await self.session.execute(
             select(User).where(User.email == normalize_email(email))
         )

@@ -10,16 +10,14 @@ from src.core.exceptions import (
 )
 from src.core.logging.logger import logger
 from src.auth.models import UserSession
+from src.auth.repositories.session import SessionRepository
 
 
 class SessionService:
     SESSION_LIFETIME = settings.SESSION_LIFETIME_DAYS
 
-    def __init__(
-        self,
-        session: AsyncSession,
-    ) -> None:
-        self.session = session
+    def __init__(self, sessions: SessionRepository) -> None:
+        self.sessions = sessions
 
     async def create_session(
         self,
@@ -34,19 +32,14 @@ class SessionService:
             ip_address=ip_address,
             expires_at=expires_at,
         )
-        self.session.add(new_session)
 
-        await self.session.flush()
+        await self.sessions.create(new_session)
         return new_session
 
-    async def get_session_by_id(self, session_id: uuid.UUID) -> UserSession | None:
-        return await self.session.get(UserSession, session_id)
-
     async def revoke_session(self, session_id: uuid.UUID) -> None:
-        session = await self.get_session_by_id(session_id)
+        session = await self.sessions.find_by_id(session_id)
         if session:
-            session.revoked_at = datetime.now(timezone.utc)
-            await self.session.flush()
+            await self.sessions.revoke(session)
 
     async def validate_session(self, user_session: UserSession) -> bool:
         now = datetime.now(timezone.utc)

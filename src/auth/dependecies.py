@@ -14,31 +14,26 @@ from .services import (
     RefreshTokenService,
     SessionService,
     TokenService,
-    UserService,
 )
+from .repositories.dependencies import UserRepoDep, SessionRepoDep
 from .utils import validate_access_token
 
 http_security = HTTPBearer()
 
 
-async def get_user_service(session: DbSession) -> UserService:
-    return UserService(session)
-
-
-UserServDep = Annotated[UserService, Depends(get_user_service)]
-
-
-async def get_session_service(session: DbSession) -> SessionService:
-    return SessionService(session)
+async def get_session_service(sessions: SessionRepoDep) -> SessionService:
+    return SessionService(sessions)
 
 
 SessionServDep = Annotated[SessionService, Depends(get_session_service)]
 
 
 async def get_auth_service(
-    session: DbSession, security: SecurityDep, user_service: UserServDep
+    session: DbSession,
+    user: UserRepoDep,
+    security: SecurityDep,
 ) -> AuthService:
-    return AuthService(session, user_service, security)
+    return AuthService(session, user, security)
 
 
 AuthServDep = Annotated[AuthService, Depends(get_auth_service)]
@@ -74,9 +69,11 @@ async def get_current_token(
 
 
 async def get_current_session(
-    service: SessionServDep, payload: TokenPayload = Depends(get_current_token)
+    service: SessionServDep,
+    sessions: SessionRepoDep,
+    payload: TokenPayload = Depends(get_current_token),
 ) -> UserSession:
-    session = await service.get_session_by_id(payload.sid)
+    session = await sessions.find_by_id(payload.sid)
     if not session:
         raise SessionNotFoundError()
 
@@ -85,10 +82,10 @@ async def get_current_session(
 
 
 async def get_current_user(
-    service: UserServDep,
+    repo: UserRepoDep,
     user_session: UserSession = Depends(get_current_session),
 ) -> User:
-    user = await service.get_by_id(id=user_session.user_id)
+    user = await repo.get_by_id(user_session.user_id)
     if not user or not user.is_active:
         raise UserError("User account is diasabled or missing")
 

@@ -8,33 +8,26 @@ from src.core.exceptions import DuplicateEmailError
 
 from ..models.user_model import User
 from src.auth.utils import normalize_email
+from ..repositories.user import UserRepository
 
 
 class UserService:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: UserRepository) -> None:
         self.session = session
 
     async def get_by_email(self, email: str) -> User | None:
-        normalized_email = normalize_email(email)
-        stmt = await self.session.execute(
-            select(User).where(User.email == normalized_email)
-        )
-        return stmt.scalar_one_or_none()
+        return await self.session.find_by_email(email)
 
     async def get_by_id(self, id: uuid.UUID) -> User | None:
-        return await self.session.get(User, id)
+        return await self.session.get_by_id(id)
 
     async def create_user(self, email: str, password_hash: str) -> User:
-        email = normalize_email(email)
         existing_user = await self.get_by_email(email)
         if existing_user:
             raise DuplicateEmailError()
         new_user = User(email=email, hashed_password=password_hash)
-        self.session.add(new_user)
-        try:
-            await self.session.flush()
-        except IntegrityError as exc:
-            raise DuplicateEmailError() from exc
+
+        await self.session.create_user(new_user)
         return new_user
 
     async def verify_user(self): ...

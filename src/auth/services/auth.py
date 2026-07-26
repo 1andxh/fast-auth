@@ -4,11 +4,12 @@ from src.core.exceptions import (
     InactiveUserError,
     InvalidCredentialsError,
 )
+
 from src.core.logging.logger import logger
 from src.auth.models import User
 from src.auth.repositories.user import UserRepository
 from src.auth.security import Security
-from auth.utils import normalize_email
+from src.auth.utils import normalize_email
 
 
 class AuthService:

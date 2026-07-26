@@ -5,6 +5,9 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.models import RefreshToken
+from src.auth.security import Security
+from src.auth.services import SessionService
 from src.core.config import settings
 from src.core.exceptions import (
     RefreshTokenAlreadyRevokedError,
@@ -12,11 +15,6 @@ from src.core.exceptions import (
     RefreshTokenReuseError,
     SessionNotFoundError,
 )
-from src.core.logging.logger import logger
-from src.auth.models import RefreshToken
-from src.auth.services import SessionService
-
-from src.auth.security import Security
 
 
 @dataclass(slots=True, frozen=True)

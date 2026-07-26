@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, Request, status
 
 from src.auth.dependecies import AuthServDep, TokenServDep
+from src.auth.models import User
+from src.auth.schemas import UserResponse
 from src.core.rate_limit.integration import (
     LOGIN_RATE_LIMIT,
     REFRESH_RATE_LIMIT,
     REGISTER_RATE_LIMIT,
 )
-from src.auth.models import User
-from src.auth.schemas import UserResponse
 
 from .dependecies import get_current_user
 from .schemas import (

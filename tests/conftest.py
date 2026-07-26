@@ -14,7 +14,7 @@ from sqlalchemy.pool import NullPool
 
 from alembic import command
 from src import app
-from src.auth.models import RefreshToken, UserSession, User
+from src.auth.models import RefreshToken, User, UserSession
 from src.auth.security import Security, security
 from src.auth.services import SessionService, UserService
 from src.core.config import settings

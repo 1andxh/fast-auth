@@ -1,15 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.exceptions import (
-    InactiveUserError,
-    InvalidCredentialsError,
-)
-
-from src.core.logging.logger import logger
 from src.auth.models import User
 from src.auth.repositories.user import UserRepository
 from src.auth.security import Security
 from src.auth.utils import normalize_email
+from src.core.exceptions import (
+    InactiveUserError,
+    InvalidCredentialsError,
+)
+from src.core.logging.logger import logger
 
 
 class AuthService:

@@ -1,16 +1,13 @@
 import uuid
-
 from datetime import datetime, timedelta, timezone
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.models import UserSession
+from src.auth.repositories.session import SessionRepository
 from src.core.config import settings
 from src.core.exceptions import (
     SessionExpiredError,
     SessionRevokedError,
 )
-from src.core.logging.logger import logger
-from src.auth.models import UserSession
-from src.auth.repositories.session import SessionRepository
 
 
 class SessionService:

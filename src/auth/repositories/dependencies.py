@@ -1,9 +1,12 @@
-from fastapi import Depends
-from src.db.dependency import DbSession
-from .user import UserRepository
-from .session import SessionRepository
-from .refresh_token import RefreshTokenRepository
 from typing import Annotated
+
+from fastapi import Depends
+
+from src.db.dependency import DbSession
+
+from .refresh_token import RefreshTokenRepository
+from .session import SessionRepository
+from .user import UserRepository
 
 
 async def get_user_respository(session: DbSession) -> UserRepository:

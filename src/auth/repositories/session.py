@@ -1,8 +1,9 @@
+import uuid
+from datetime import datetime, timezone
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import uuid
 from src.auth.models.session import UserSession
-from datetime import datetime, timezone
 
 
 class SessionRepository:

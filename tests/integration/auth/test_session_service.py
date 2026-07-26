@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from src.core.exceptions import SessionExpiredError
 from src.auth.models import User
+from src.core.exceptions import SessionExpiredError
 
 
 @pytest.mark.asyncio

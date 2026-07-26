@@ -7,7 +7,8 @@ from src.auth.annotations import SecurityDep
 from src.core.exceptions import SessionNotFoundError, UserError
 from src.db.dependency import DbSession
 
-from .models import UserSession, User
+from .models import User, UserSession
+from .repositories.dependencies import SessionRepoDep, UserRepoDep
 from .schemas import TokenPayload
 from .services import (
     AuthService,
@@ -15,7 +16,6 @@ from .services import (
     SessionService,
     TokenService,
 )
-from .repositories.dependencies import UserRepoDep, SessionRepoDep
 from .utils import validate_access_token
 
 http_security = HTTPBearer()

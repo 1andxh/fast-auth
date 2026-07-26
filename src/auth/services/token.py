@@ -1,12 +1,12 @@
-import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
-from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.models import User
+from src.auth.security import Security
+from src.auth.services import RefreshTokenService, SessionService
 from src.auth.utils import create_access_token
-from src.core.config import settings
 from src.core.exceptions import (
     ExpiredTokenError,
     InvalidRefreshToken,
@@ -14,10 +14,6 @@ from src.core.exceptions import (
     SessionNotFoundError,
 )
 from src.core.logging.logger import logger
-from src.auth.models import User
-from src.auth.services import RefreshTokenService, SessionService
-
-from src.auth.security import Security
 
 
 @dataclass(slots=True, frozen=True)

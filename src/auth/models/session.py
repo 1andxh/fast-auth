@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -19,8 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
 
 if TYPE_CHECKING:
-    from src.auth.models import User
-    from src.auth.models import RefreshToken
+    from src.auth.models import RefreshToken, User
 
 
 class UserSession(Base):

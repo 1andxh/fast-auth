@@ -1,13 +1,8 @@
 import uuid
 
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.core.exceptions import DuplicateEmailError
 
 from ..models.user_model import User
-from src.auth.utils import normalize_email
 from ..repositories.user import UserRepository
 
 

@@ -2,12 +2,9 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.auth.models import RefreshToken
+from src.auth.repositories import RefreshTokenRepository, SessionRepository
 from src.auth.security import Security
-from src.auth.repositories import SessionRepository, RefreshTokenRepository
 from src.core.config import settings
 from src.core.exceptions import (
     RefreshTokenAlreadyRevokedError,

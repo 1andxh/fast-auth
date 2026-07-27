@@ -8,7 +8,7 @@ from src.core.exceptions import SessionNotFoundError, UserError
 from src.db.dependency import DbSession
 
 from .models import User, UserSession
-from .repositories.dependencies import SessionRepoDep, UserRepoDep, RefreshTokenRepoDep
+from .repositories.dependencies import RefreshTokenRepoDep, SessionRepoDep, UserRepoDep
 from .schemas import TokenPayload
 from .services import (
     AuthService,

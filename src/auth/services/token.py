@@ -4,9 +4,9 @@ from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User
+from src.auth.repositories.session import SessionRepository
 from src.auth.security import Security
 from src.auth.services import RefreshTokenService, SessionService
-from src.auth.repositories.session import SessionRepository
 from src.auth.utils import create_access_token
 from src.core.exceptions import (
     ExpiredTokenError,

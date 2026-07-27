@@ -1,7 +1,8 @@
-from datetime import datetime, timezone
 import uuid
-from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, timezone
+
 from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models.refresh_token import RefreshToken
 

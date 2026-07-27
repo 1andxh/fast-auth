@@ -24,4 +24,9 @@ SessionRepoDep = Annotated[SessionRepository, Depends(get_session_repository)]
 
 
 async def get_refresh_token_repository(session: DbSession) -> RefreshTokenRepository:
-    return RefreshTokenRepository()
+    return RefreshTokenRepository(session)
+
+
+RefreshTokenRepoDep = Annotated[
+    RefreshTokenRepository, Depends(get_refresh_token_repository)
+]

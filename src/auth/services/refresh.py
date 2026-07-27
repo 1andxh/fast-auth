@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import RefreshToken
 from src.auth.security import Security
-from src.auth.services import SessionService
+from src.auth.repositories import SessionRepository, RefreshTokenRepository
 from src.core.config import settings
 from src.core.exceptions import (
     RefreshTokenAlreadyRevokedError,
@@ -25,16 +25,19 @@ class RefreshTokenResult:
 
 class RefreshTokenService:
     def __init__(
-        self, session: AsyncSession, session_service: SessionService, security: Security
+        self,
+        tokens: RefreshTokenRepository,
+        sessions: SessionRepository,
+        security: Security,
     ) -> None:
-        self.session = session
-        self.session_service = session_service
+        self.tokens = tokens
+        self.sessions = sessions
         self.security = security
 
     async def create_refresh_token(
         self, session_id: uuid.UUID, family_id: uuid.UUID | None = None
     ) -> RefreshTokenResult:
-        user_session = await self.session_service.get_session_by_id(session_id)
+        user_session = await self.sessions.find_by_id(session_id)
         if not user_session:
             raise SessionNotFoundError()
         raw_token = self.security.generate_refresh_token()
@@ -50,24 +53,16 @@ class RefreshTokenService:
             family_id=family_id or uuid.uuid4(),
             expires_at=expires_at,
         )
-
-        self.session.add(token)
-        await self.session.flush()
+        await self.tokens.create(token)
 
         return RefreshTokenResult(refresh_token=token, raw_token=raw_token)
 
-    async def get_refresh_token(self, token_id: uuid.UUID) -> RefreshToken | None:
-        return await self.session.get(RefreshToken, token_id)
-
     async def get_token_by_hash(self, token: str) -> RefreshToken | None:
         token_hash = self.security.hash_refresh_token(token=token)
-        stmt = await self.session.execute(
-            select(RefreshToken).where(RefreshToken.token_hash == token_hash)
-        )
-        return stmt.scalar_one_or_none()
+        return await self.tokens.find_by_hash(token_hash)
 
     async def rotate_refresh_token(self, token_id: uuid.UUID) -> RefreshTokenResult:
-        old_token = await self.get_refresh_token(token_id)
+        old_token = await self.tokens.find_by_id(token_id)
         if not old_token:
             raise RefreshTokenNotFoundError()
 
@@ -83,28 +78,17 @@ class RefreshTokenService:
 
         new_token.refresh_token.parent_token_id = old_token.id
 
-        await self.session.flush()
+        await self.tokens.flush()
         return new_token
 
     async def revoke_refresh_token(self, token_id: uuid.UUID) -> None:
-        token = await self.get_refresh_token(token_id)
+        token = await self.tokens.find_by_id(token_id)
         if not token:
             raise RefreshTokenNotFoundError()
         if token.is_revoked is True:
             raise RefreshTokenAlreadyRevokedError()
 
-        token.revoked_at = datetime.now(timezone.utc)
-        token.is_revoked = True
+        await self.tokens.revoke(token)
 
-        await self.session.flush()
-
-    async def revoke_token_family(self, family_id: uuid.UUID):
-        now = datetime.now(timezone.utc)
-        stmt = (
-            update(RefreshToken)
-            .where(RefreshToken.family_id == family_id)
-            .values(is_revoked=True, revoked_at=now)
-        )
-
-        await self.session.execute(stmt)
-        await self.session.flush()
+    async def revoke_token_family(self, family_id: uuid.UUID) -> None:
+        await self.tokens.revoke_family(family_id)

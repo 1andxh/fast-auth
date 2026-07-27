@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.models import User
 from src.auth.security import Security
 from src.auth.services import RefreshTokenService, SessionService
+from src.auth.repositories.session import SessionRepository
 from src.auth.utils import create_access_token
 from src.core.exceptions import (
     ExpiredTokenError,
@@ -27,12 +28,14 @@ class TokenService:
         self,
         session: AsyncSession,
         session_service: SessionService,
+        sessions_repo: SessionRepository,
         refresh_token_service: RefreshTokenService,
         security: Security,
     ) -> None:
         self.session_service = session_service
         self.refresh_token_service = refresh_token_service
         self.session = session
+        self.sessions_repo = sessions_repo
         self.security = security
 
     async def issue_token_pair(
@@ -70,7 +73,7 @@ class TokenService:
         elif stored_token.expires_at <= datetime.now(timezone.utc):
             raise ExpiredTokenError()
 
-        session = await self.session_service.get_session_by_id(stored_token.session_id)
+        session = await self.sessions_repo.find_by_id(stored_token.session_id)
         if not session:
             raise SessionNotFoundError()
         await self.session_service.validate_session(session)

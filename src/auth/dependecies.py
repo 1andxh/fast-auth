@@ -8,7 +8,7 @@ from src.core.exceptions import SessionNotFoundError, UserError
 from src.db.dependency import DbSession
 
 from .models import User, UserSession
-from .repositories.dependencies import SessionRepoDep, UserRepoDep
+from .repositories.dependencies import SessionRepoDep, UserRepoDep, RefreshTokenRepoDep
 from .schemas import TokenPayload
 from .services import (
     AuthService,
@@ -40,9 +40,9 @@ AuthServDep = Annotated[AuthService, Depends(get_auth_service)]
 
 
 async def get_refresh_service(
-    session: DbSession, security: SecurityDep, service: SessionServDep
+    tokens: RefreshTokenRepoDep, security: SecurityDep, sessions: SessionRepoDep
 ) -> RefreshTokenService:
-    return RefreshTokenService(session, service, security)
+    return RefreshTokenService(tokens, sessions, security)
 
 
 RefreshServDep = Annotated[RefreshTokenService, Depends(get_refresh_service)]
@@ -51,10 +51,11 @@ RefreshServDep = Annotated[RefreshTokenService, Depends(get_refresh_service)]
 async def get_token_service(
     session: DbSession,
     user_session: SessionServDep,
+    session_repo: SessionRepoDep,
     refresh_service: RefreshServDep,
     security: SecurityDep,
 ) -> TokenService:
-    return TokenService(session, user_session, refresh_service, security)
+    return TokenService(session, user_session, session_repo, refresh_service, security)
 
 
 TokenServDep = Annotated[TokenService, Depends(get_token_service)]
